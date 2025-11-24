@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">feedmind-app</string>
-    <string name="title_activity_main">feedmind-app</string>
-    <string name="package_name">com.example.app</string>
-    <string name="custom_url_scheme">com.example.app</string>
+    <string name="app_name">RSSMindly</string>
+    <string name="title_activity_main">RSSMindly</string>
+    <string name="package_name">com.rssmindly.app</string>
+    <string name="custom_url_scheme">com.rssmindly.app</string>
 </resources>

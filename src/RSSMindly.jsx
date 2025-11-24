@@ -5,7 +5,7 @@ import {
   Folder, Moon, Sun, Monitor, Search, Loader2,
   ChevronRight, ChevronDown, FileText, Pencil,
   AlertCircle, WifiOff, Filter, GripVertical, Wand2, Key, Info,
-  ShieldCheck, Database
+  ShieldCheck, Database, Cpu, Download
 } from 'lucide-react';
 
 // ==========================================
@@ -13,6 +13,9 @@ import {
 // ==========================================
 
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
+// Local Model for "Pro" WebLLM features (optional usage)
+const SELECTED_LOCAL_MODEL = "Gemma-2b-it-q4f32_1"; 
+
 const CORS_PROXY = 'https://corsproxy.io/?';
 const CACHE_TTL = 5 * 60 * 1000; // 5 Minutes
 const ITEMS_PER_PAGE = 20;
@@ -65,7 +68,7 @@ const cleanText = (html) => {
   return doc.body.textContent || '';
 };
 
-// --- SMART CACHE SERVICE (Simulates Server Database for local testing) ---
+// --- SMART CACHE SERVICE ---
 const SmartCacheService = {
   get: (key) => {
     try {
@@ -75,7 +78,6 @@ const SmartCacheService = {
   },
   set: (key, data) => {
     try {
-      // In a real app, this goes to Redis/Postgres
       localStorage.setItem(`smart_cache_${key}`, JSON.stringify({
         data,
         timestamp: Date.now()
@@ -91,8 +93,6 @@ const detectCategoryRuleBased = (text) => {
   const scores = {};
 
   const addScore = (cat, points) => { scores[cat] = (scores[cat] || 0) + points; };
-  
-  // Helper: Counts regex matches with word boundaries (\b)
   const countMatches = (pattern) => {
     try {
       const regex = new RegExp(`\\b(${pattern})\\b`, 'gi');
@@ -101,41 +101,28 @@ const detectCategoryRuleBased = (text) => {
     } catch (e) { return 0; }
   };
 
-  // --- SCORE DEFINITIONS (WEIGHTED) ---
   addScore('Tech', countMatches('cybersecurity|artificial intelligence|ai|machine learning|blockchain|saas|technology|software|hardware|gadget|smartphone|app|server|cloud|digital|internet|usb|wifi|bluetooth|microsoft|google|meta|linux|windows|android|ios|nvidia|intel') * 1.5);
   addScore('Startups', countMatches('startup|founder|venture capital|seed round|unicorn|pitch deck|ipo|y combinator|incubator|accelerator') * 2);
   addScore('Programming', countMatches('programming|coding|developer|software engineer|javascript|python|react|git|sql|database|api|backend|frontend|rust|golang|node\.js|typescript') * 2);
-  
   addScore('Economy', countMatches('economy|inflation|gdp|recession|federal reserve|interest rate|tax|deficit|labor market|unemployment|cpi') * 2);
   addScore('Finance', countMatches('finance|stock market|wall street|crypto|bitcoin|investing|asset|wealth|fund|etf|portfolio|dividend|bank|banking') * 2);
   addScore('Business', countMatches('business|corporate|ceo|cfo|revenue|profit|supply chain|retail|enterprise|shareholder|acquisition|merger') * 1.5);
-  
   addScore('Gaming', countMatches('esport|twitch|nintendo|playstation|xbox|gameplay|rpg|console|controller|metacritic|steam deck|dlc') * 2);
-  // Context check for "game"
   if (/\b(game|games)\b/.test(lower) && !scores['Sports']) addScore('Gaming', 0.5);
-
   addScore('Sports', countMatches('sports|football|soccer|basketball|nba|nfl|baseball|athlete|championship|tournament|olympics|medal|league') * 2);
-  
   addScore('Science', countMatches('physics|chemistry|biology|astronomy|nasa|space|telescope|quantum|genome|scientist|evolution') * 2);
   addScore('Health', countMatches('medicine|doctor|virus|vaccine|disease|hospital|patient|treatment|healthcare|nutrition|wellness|cancer|medical') * 2);
-  
-  // Food vs General
   addScore('Food', countMatches('recipe|cook|cooking|baking|cuisine|chef|ingredient|dining|restaurant|kitchen|meal|diet|vegan|vegetarian|flavor|dish|lunch|dinner') * 2);
-  
   addScore('Travel', countMatches('travel|vacation|tourism|tourist|hotel|flight|airline|airport|destination|passport|cruise|resort') * 2);
-  
-  // Strict Automotive
   addScore('Automotive', countMatches('automotive|vehicle|racing|f1|motor|engine|suv|sedan|truck|electric vehicle|ev') * 2);
   if (/\b(car|cars)\b/.test(lower)) addScore('Automotive', 2);
-  
   addScore('Politics', countMatches('politics|government|congress|senate|election|vote|campaign|policy|law|legislation|white house|democrat|republican') * 2);
   addScore('World News', countMatches('international|global|geopolitics|foreign affairs|united nations|nato|diplomacy|treaty') * 2);
 
-  // --- EVALUATE WINNER ---
   let bestCat = 'General';
   let maxScore = 0;
   for (const [cat, score] of Object.entries(scores)) {
-    if (score > maxScore && score >= 1.5) { // Threshold to avoid weak matches
+    if (score > maxScore && score >= 1.5) {
       maxScore = score;
       bestCat = cat;
     }
@@ -209,7 +196,6 @@ const sanitizeHtml = (html) => {
   return tmp.innerHTML;
 };
 
-// Cloud API Call (For client-side / Free tier)
 async function callGemini(prompt, apiKey, jsonMode = false) {
   if (!apiKey) return null;
   try {
@@ -241,7 +227,8 @@ const BrowserView = ({ url, onClose }) => {
   if (!url) return null;
   return (
     <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col animate-in slide-in-from-bottom duration-300">
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800 shadow-sm">
+      {/* SAFE AREA FIX: Dynamic Top Padding for Browser Header */}
+      <div className="flex items-center justify-between px-3 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800 shadow-sm">
         <button onClick={onClose} className="flex items-center gap-1 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors">
           <ArrowLeft size={20} />
           <span className="font-medium">Back</span>
@@ -275,7 +262,6 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   );
 };
 
-// Component to display summary with source indicator
 const SummaryDisplay = ({ summary, source }) => (
   <div className={`mt-2 p-3 rounded-lg border text-sm animate-in fade-in zoom-in-95 duration-200 ${
     source === 'cache' 
@@ -294,7 +280,7 @@ const SummaryDisplay = ({ summary, source }) => (
 
 const FeedItem = ({ article, isSelected, onToggleSelect, onOpenBrowser, apiKey, isProMode }) => {
   const [isSummarizing, setIsSummarizing] = useState(false);
-  const [summaryData, setSummaryData] = useState(null); // { text: string, source: 'cache' | 'ai' }
+  const [summaryData, setSummaryData] = useState(null);
 
   const getCleanLink = (url) => `https://smry.ai/${url}`;
   const handleLinkClick = (e) => { e.preventDefault(); onOpenBrowser(getCleanLink(article.link)); };
@@ -303,72 +289,62 @@ const FeedItem = ({ article, isSelected, onToggleSelect, onOpenBrowser, apiKey, 
     e.stopPropagation();
     if (summaryData) return;
 
+    const cached = SmartCacheService.get(article.guid);
+    if (cached && cached.data) {
+      setSummaryData({ text: cached.data, source: 'cache' });
+      return;
+    }
+
+    if (!isProMode && !apiKey) {
+      alert("Free Plan: Please enter your Gemini API Key in Settings.\nPro Plan: Upgrade to skip this.");
+      return;
+    }
+
+    // In production, this logic would differ slightly between free (client-side) and pro (server-side)
+    // For the buildable demo, we use client-side call or endpoint fetch based on mode.
+    const keyToUse = apiKey; 
+    if (!isProMode && !keyToUse) {
+        alert("Please enter a key in settings.");
+        return;
+    }
+
     setIsSummarizing(true);
-
     try {
-      // --- PRO MODE LOGIC (Backend Proxy) ---
       if (isProMode) {
-        // In production, use full domain: 'https://your-app.vercel.app/api/summarize'
-        const endpoint = 'https://rssmindly-b57c.vercel.app/api/summarize'; 
-        
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            articleUrl: article.link,
-            title: article.title,
-            content: article.description
-          })
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setSummaryData({ text: data.summary, source: data.source }); 
-        } else {
-          // Fallback for demo if backend isn't actually running yet
-          console.warn("Backend unreachable, falling back to client simulation for demo.");
-          // Simulate server behavior
-          const cached = SmartCacheService.get(article.guid);
-          if (cached) {
-             setSummaryData({ text: cached.data, source: 'cache' });
-          } else if (apiKey) {
-             const prompt = `Summarize this in 2-3 bullet points. HTML <ul> output. Title: ${article.title}. Content: ${article.description}`;
-             const result = await callGemini(prompt, apiKey);
-             if (result) {
-               const cleanHtml = sanitizeHtml(result.replace(/``````/g, ''));
-               SmartCacheService.set(article.guid, cleanHtml);
-               setSummaryData({ text: cleanHtml, source: 'ai' });
+         // Backend Call Structure
+         const endpoint = 'https://rssmindly-beta.vercel.app/api/summarize'; 
+         try {
+             const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    articleUrl: article.link,
+                    title: article.title,
+                    content: article.description
+                })
+             });
+             if(response.ok) {
+                 const data = await response.json();
+                 setSummaryData({ text: data.summary, source: data.source });
+                 return;
              }
-          } else {
-             alert("Backend Error: Could not reach server and no local API Key found.");
-          }
-        }
-      } 
-      
-      // --- FREE MODE LOGIC (Client Side BYOK) ---
-      else {
-        if (!apiKey) {
-          alert("Free Plan: Please enter your Gemini API Key in Settings.\nPro Plan: Upgrade to skip this.");
-          return;
-        }
-        
-        // Simple Cache check for free users too (Local Storage)
-        const cached = SmartCacheService.get(article.guid);
-        if (cached) {
-           setSummaryData({ text: cached.data, source: 'cache' });
-           return;
-        }
+         } catch(e) {
+             console.warn("Backend failed, falling back to local key for demo", e);
+         }
+      }
 
-        const prompt = `Summarize this in 2-3 bullet points. HTML <ul> output. Title: ${article.title}. Content: ${article.description}`;
-        const result = await callGemini(prompt, apiKey);
-        
-        if (result) {
-          const cleanHtml = sanitizeHtml(result.replace(/``````/g, ''));
-          SmartCacheService.set(article.guid, cleanHtml);
-          setSummaryData({ text: cleanHtml, source: 'ai' });
-        } else {
-          alert("Failed to fetch summary.");
-        }
+      // Fallback / Free Mode
+      if (apiKey) {
+          const prompt = `Summarize this in 2-3 bullet points. HTML <ul> output. Title: ${article.title}. Content: ${article.description}`;
+          const result = await callGemini(prompt, apiKey);
+          
+          if (result) {
+            const cleanHtml = sanitizeHtml(result.replace(/``````/g, ''));
+            SmartCacheService.set(article.guid, cleanHtml);
+            setSummaryData({ text: cleanHtml, source: 'ai' });
+          } else {
+            alert("Failed to fetch summary.");
+          }
       }
     } catch (error) {
       console.error(error);
@@ -426,8 +402,6 @@ const FeedItem = ({ article, isSelected, onToggleSelect, onOpenBrowser, apiKey, 
 export default function RSSMindlyApp() {
   const [theme, setTheme] = useState(() => localStorage.getItem('app_theme') || 'system');
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
-  
-  // "Pro Mode" Simulation State
   const [isProMode, setIsProMode] = useState(() => localStorage.getItem('is_pro_mode') === 'true');
 
   const [feeds, setFeeds] = useState(() => {
@@ -493,13 +467,11 @@ export default function RSSMindlyApp() {
   useEffect(() => { localStorage.setItem('gemini_api_key', apiKey); }, [apiKey]);
   useEffect(() => { localStorage.setItem('is_pro_mode', isProMode); }, [isProMode]);
 
-  // Initial fetch on view change
   useEffect(() => {
     fetchArticles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeView, feeds, bundles]);
 
-  // AI Categorization Effect
   useEffect(() => {
     if (!apiKey || isAiCategorizing || articles.length === 0) return;
     const unprocessed = articles.filter(a => !aiProcessedGuids.current.has(a.guid)).slice(0, 10);
@@ -687,8 +659,7 @@ export default function RSSMindlyApp() {
 
     if (feedsToFetch.length === 0) { setArticles([]); setLoading(false); return; }
 
-    // feedsToFetch = feedsToFetch.slice(0, MAX_CONCURRENT_REQUESTS); // Removed limit
-
+    // Batch Process all feeds
     const allFetchedArticles = [];
     try {
       for (let i = 0; i < feedsToFetch.length; i += MAX_CONCURRENT_REQUESTS) {
@@ -825,8 +796,10 @@ export default function RSSMindlyApp() {
     <div className="flex h-screen bg-gray-50 dark:bg-slate-900 font-sans text-gray-900 dark:text-gray-100 overflow-hidden">
       <BrowserView url={browserUrl} onClose={() => setBrowserUrl(null)} />
       {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)} />}
+      
       <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:relative`}>
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        {/* SAFE AREA FIX: Header Padding for Sidebar */}
+        <div className="px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
             <div className="bg-blue-600 text-white p-1 rounded"><Sparkles size={16} /></div>
             <span className="font-bold text-lg tracking-tight">RSSMindly</span>
@@ -903,7 +876,8 @@ export default function RSSMindlyApp() {
       </aside>
 
       <main className="flex-1 flex flex-col w-full min-w-0">
-        <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 sticky top-0 z-10 shadow-sm">
+        {/* SAFE AREA FIX: Main Header Padding */}
+        <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] sticky top-0 z-10 shadow-sm">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2 overflow-hidden">
               <button onClick={() => setSidebarOpen(true)} className="md:hidden p-2 -ml-2 text-gray-600 dark:text-gray-300"><Menu size={24} /></button>
@@ -959,7 +933,7 @@ export default function RSSMindlyApp() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 relative">
+        <div className="flex-1 overflow-y-auto p-4 relative pb-24">
           {loading && filteredArticles.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-gray-400"><RefreshCw size={32} className="animate-spin mb-4 text-blue-500" /><p>Fetching latest news...</p></div>
           ) : !loading && filteredArticles.length === 0 ? (
@@ -969,7 +943,7 @@ export default function RSSMindlyApp() {
               <p className="text-gray-500 max-w-sm mx-auto">Try adjusting your search or filters.</p>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto space-y-4 pb-24">
+            <div className="max-w-3xl mx-auto space-y-4">
               {filteredArticles.map(article => (
                 <FeedItem 
                   key={article.guid} 
@@ -986,7 +960,8 @@ export default function RSSMindlyApp() {
         </div>
 
         {selectedIds.size > 0 && (
-          <div className="fixed bottom-6 left-1/2 md:left-auto md:right-8 transform -translate-x-1/2 md:translate-x-0 z-40 animate-in slide-in-from-bottom-4">
+          // SAFE AREA FIX: Bottom padding for Home Indicator
+          <div className="fixed bottom-6 left-1/2 md:left-auto md:right-8 transform -translate-x-1/2 md:translate-x-0 z-40 animate-in slide-in-from-bottom-4 mb-[env(safe-area-inset-bottom)]">
             <button onClick={generateDigest} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg shadow-blue-600/30 transition-all font-medium">
               <Sparkles size={18} className="animate-pulse" /> Summarize Selected ({selectedIds.size})
             </button>

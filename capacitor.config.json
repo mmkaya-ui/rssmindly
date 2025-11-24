@@ -1,5 +1,5 @@
 {
-  "appId": "com.example.app",
-  "appName": "feedmind-app",
+  "appId": "com.rssmindly.app",
+  "appName": "RSSMindly",
   "webDir": "dist"
 }
