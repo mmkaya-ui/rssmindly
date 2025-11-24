@@ -309,7 +309,7 @@ const FeedItem = ({ article, isSelected, onToggleSelect, onOpenBrowser, apiKey, 
       // --- PRO MODE LOGIC (Backend Proxy) ---
       if (isProMode) {
         // In production, use full domain: 'https://your-app.vercel.app/api/summarize'
-        const endpoint = '/api/summarize'; 
+        const endpoint = 'https://rssmindly-b57c.vercel.app/api/summarize'; 
         
         const response = await fetch(endpoint, {
           method: 'POST',
