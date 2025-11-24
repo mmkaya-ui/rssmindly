@@ -300,8 +300,6 @@ const FeedItem = ({ article, isSelected, onToggleSelect, onOpenBrowser, apiKey, 
       return;
     }
 
-    // In production, this logic would differ slightly between free (client-side) and pro (server-side)
-    // For the buildable demo, we use client-side call or endpoint fetch based on mode.
     const keyToUse = apiKey; 
     if (!isProMode && !keyToUse) {
         alert("Please enter a key in settings.");
@@ -311,8 +309,7 @@ const FeedItem = ({ article, isSelected, onToggleSelect, onOpenBrowser, apiKey, 
     setIsSummarizing(true);
     try {
       if (isProMode) {
-         // Backend Call Structure
-         const endpoint = 'https://rssmindly-beta.vercel.app/api/summarize'; 
+         const endpoint = 'https://rssmindly-b57c.vercel.app/api/summarize'; 
          try {
              const response = await fetch(endpoint, {
                 method: 'POST',
@@ -333,7 +330,6 @@ const FeedItem = ({ article, isSelected, onToggleSelect, onOpenBrowser, apiKey, 
          }
       }
 
-      // Fallback / Free Mode
       if (apiKey) {
           const prompt = `Summarize this in 2-3 bullet points. HTML <ul> output. Title: ${article.title}. Content: ${article.description}`;
           const result = await callGemini(prompt, apiKey);
@@ -453,12 +449,22 @@ export default function RSSMindlyApp() {
 
   useEffect(() => {
     const root = window.document.documentElement;
+    const body = window.document.body;
     root.classList.remove('light', 'dark');
+    
+    let targetTheme = theme;
     if (theme === 'system') {
-      root.classList.add(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    } else {
-      root.classList.add(theme);
+      targetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
+    
+    root.classList.add(targetTheme);
+    // FIX: Explicitly set body background to prevent white gaps in safe areas
+    if (targetTheme === 'dark') {
+      body.style.backgroundColor = '#0f172a'; // slate-900
+    } else {
+      body.style.backgroundColor = '#f9fafb'; // gray-50
+    }
+    
     localStorage.setItem('app_theme', theme);
   }, [theme]);
 
@@ -796,10 +802,8 @@ export default function RSSMindlyApp() {
     <div className="flex h-screen bg-gray-50 dark:bg-slate-900 font-sans text-gray-900 dark:text-gray-100 overflow-hidden">
       <BrowserView url={browserUrl} onClose={() => setBrowserUrl(null)} />
       {isSidebarOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)} />}
-      
       <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:relative`}>
-        {/* SAFE AREA FIX: Header Padding for Sidebar */}
-        <div className="px-4 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
             <div className="bg-blue-600 text-white p-1 rounded"><Sparkles size={16} /></div>
             <span className="font-bold text-lg tracking-tight">RSSMindly</span>
@@ -849,7 +853,8 @@ export default function RSSMindlyApp() {
           <div>
             <div className="mt-4 mb-1 px-3 text-xs font-bold text-gray-400 flex justify-between items-center cursor-pointer" onClick={() => setIsFeedsExpanded(!isFeedsExpanded)}>
               <span>FEEDS</span>
-              <div className="flex items-center gap-1">
+              {/* FIX: Increased gap from gap-1 to gap-12 */}
+              <div className="flex items-center gap-12">
                 <button onClick={(e) => { e.stopPropagation(); setShowAddFeedModal(true); }}><Plus size={14} /></button>
                 {isFeedsExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </div>
@@ -876,7 +881,6 @@ export default function RSSMindlyApp() {
       </aside>
 
       <main className="flex-1 flex flex-col w-full min-w-0">
-        {/* SAFE AREA FIX: Main Header Padding */}
         <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] sticky top-0 z-10 shadow-sm">
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2 overflow-hidden">
@@ -960,7 +964,6 @@ export default function RSSMindlyApp() {
         </div>
 
         {selectedIds.size > 0 && (
-          // SAFE AREA FIX: Bottom padding for Home Indicator
           <div className="fixed bottom-6 left-1/2 md:left-auto md:right-8 transform -translate-x-1/2 md:translate-x-0 z-40 animate-in slide-in-from-bottom-4 mb-[env(safe-area-inset-bottom)]">
             <button onClick={generateDigest} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg shadow-blue-600/30 transition-all font-medium">
               <Sparkles size={18} className="animate-pulse" /> Summarize Selected ({selectedIds.size})
@@ -1071,9 +1074,22 @@ export default function RSSMindlyApp() {
                   <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter your Gemini API Key" />
                   <Key size={16} className="absolute left-3 top-2.5 text-gray-400" />
                 </div>
-                <p className="text-xs text-gray-500">
-                  You control the costs. Get a free key from Google AI Studio.
-                </p>
+                {/* FIX: Added Detailed API Key Guide */}
+                <div className="flex flex-col gap-2 mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-md border border-blue-100 dark:border-blue-800">
+                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium text-xs">
+                    <Info size={14} />
+                    <span>How to get a Key:</span>
+                  </div>
+                  <ol className="list-decimal list-inside text-[10px] text-gray-600 dark:text-gray-400 space-y-1">
+                    <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-bold">Google AI Studio</a>.</li>
+                    <li>Click <strong>"Create API Key"</strong>.</li>
+                    <li>Select "Create key in new project".</li>
+                    <li>Copy the key and paste it above.</li>
+                  </ol>
+                  <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-500 hover:underline mt-1 block">
+                    Read official documentation &rarr;
+                  </a>
+                </div>
               </div>
             )}
           </div>
