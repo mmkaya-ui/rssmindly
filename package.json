@@ -12,6 +12,8 @@
   "dependencies": {
     "@capacitor/android": "^7.4.4",
     "@capacitor/core": "^7.4.4",
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.117.3",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
