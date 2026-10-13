@@ -50,7 +50,7 @@ flowchart TD
 ### 3. Cascading Multi-Tier Speculative Summarization (Cost & Latency Optimization)
 - **Tier 1 (Instant & Free — 0ms):** Extractive compressor (heuristic lead-paragraph + headline-salience scoring) produces an immediate 1-sentence micro-summary shown speculatively while loading ($0 cost, 0 tokens).
 - **Tier 2 (Cheap & Fast — Gemini 1.5 Flash):** Structured 3-bullet takeaway generated in background or fetched via semantic cache.
-- **Tier 3 (Deep-Dive / On-Demand):** When users request *"Why does this matter?"*, an analytical agent synthesizes strategic catalysts, key stakeholders, and future market implications.
+- **Tier 3 (On-Demand Long-Form Intelligence Brief):** When users select **📖 View Full Brief** or request in-depth analysis, an analytical agent generates a comprehensive 4-section executive brief (Executive Overview & Key Developments, Detailed Background & Context, Verified Key Metrics Table, and Strategic Outlook) saved directly into Supabase `tier3_deepdive` for instant 0-token recall across sessions.
 
 ### 4. Self-Evaluating Groundedness & Source Attribution (Zero-Hallucination Guarantee)
 - Deterministic numeric & entity validation pipeline runs before caching:

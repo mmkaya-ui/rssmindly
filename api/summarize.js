@@ -73,6 +73,8 @@ export default async function handler(req, res) {
     // --------------------------------------------------------------------------
     // STEP 1: EXACT URL CACHE LOOKUP (O(1))
     // --------------------------------------------------------------------------
+    const isLongMode = mode === 'tier3' || mode === 'detailed' || mode === 'long' || includeDeepDive;
+
     if (supabase) {
       const { data: exactMatch } = await supabase
         .from('summaries')
@@ -81,8 +83,8 @@ export default async function handler(req, res) {
         .maybeSingle();
 
       if (exactMatch) {
-        // If user specifically requested Tier 3 and it's already cached
-        if (mode === 'tier3' && exactMatch.tier3_deepdive) {
+        // If user requested long/detailed summary and it's already cached
+        if (isLongMode && exactMatch.tier3_deepdive) {
           return res.status(200).json({
             summary: exactMatch.tier3_deepdive,
             tier1: exactMatch.tier1_micro || tier1Micro,
@@ -90,14 +92,15 @@ export default async function handler(req, res) {
             tier3: exactMatch.tier3_deepdive,
             source: 'cache',
             matchType: 'exact',
+            isLong: true,
             groundednessScore: exactMatch.groundedness_score ?? 1.0,
             groundednessReport: exactMatch.groundedness_report ?? {},
             latencyMs: Date.now() - startTime
           });
         }
 
-        // Return exact cache hit
-        if (mode !== 'tier3') {
+        // Return exact cache hit for standard summary
+        if (!isLongMode) {
           // Increment hit count asynchronously
           supabase.rpc('increment_summary_hit', { summary_id: exactMatch.id }).catch(() => {});
 
@@ -141,15 +144,16 @@ export default async function handler(req, res) {
           // Increment hit count asynchronously
           supabase.rpc('increment_summary_hit', { summary_id: semanticHit.id }).catch(() => {});
 
-          // If mode is not tier3, return the semantic match immediately!
-          if (mode !== 'tier3' || semanticHit.tier3_deepdive) {
+          // If mode is long/detailed and cached, return it; or return standard summary
+          if (!isLongMode || semanticHit.tier3_deepdive) {
             return res.status(200).json({
-              summary: semanticHit.text || semanticHit.tier2_bullets,
+              summary: isLongMode && semanticHit.tier3_deepdive ? semanticHit.tier3_deepdive : (semanticHit.text || semanticHit.tier2_bullets),
               tier1: semanticHit.tier1_micro || tier1Micro,
               tier2: semanticHit.tier2_bullets || semanticHit.text,
               tier3: semanticHit.tier3_deepdive || null,
               source: 'cache',
               matchType: 'semantic',
+              isLong: isLongMode,
               similarity: similarityScore,
               matchedTitle: semanticHit.title,
               matchedSource: semanticHit.source,
@@ -235,32 +239,38 @@ ${content.slice(0, 4000)}`;
     }
 
     // --------------------------------------------------------------------------
-    // STEP 3 (Tier 3): DEEP-DIVE ON-DEMAND SYNTHESIS (GEMINI PRO / AGENTIC)
+    // STEP 3: LONG-FORM DETAILED BRIEF & STRATEGIC DEEP DIVE (ON USER REQUEST)
     // --------------------------------------------------------------------------
     let tier3DeepDive = null;
-    if (mode === 'tier3' || includeDeepDive) {
+    if (isLongMode) {
       try {
         const deepModel = genAI.getGenerativeModel({
-          model: 'gemini-1.5-flash', // fast, or gemini-1.5-pro if key allows
-          generationConfig: { temperature: 0.3 }
+          model: 'gemini-1.5-flash',
+          generationConfig: { temperature: 0.25 }
         });
 
-        const deepPrompt = `Provide a senior analyst Deep-Dive intelligence brief on this development.
-Structure with three clean HTML sections using <h4> and <p> tags:
-1. <h4>Strategic Context & Core Catalyst</h4>
-2. <h4>Key Stakeholders & Market Impact</h4>
-3. <h4>Future Outlook & What to Watch</h4>
-Output clean HTML only. No markdown.
+        const deepPrompt = `You are an elite, comprehensive investigative intelligence analyst.
+Provide an extensive, long-form detailed intelligence summary of this news story.
+Structure with four clean HTML sections using <h4>, <p>, and <ul>:
+1. <h4>Executive Overview & Key Developments</h4>
+<p>A comprehensive 2-paragraph narrative detailing what took place and the primary catalyst.</p>
+2. <h4>Detailed Background, Context & Key Statements</h4>
+<p>Context, named executives/officials, direct quotes, and precedents.</p>
+3. <h4>Key Metrics & Confirmed Figures</h4>
+<ul><li>List every confirmed number, dollar amount, percentage, and date verbatim.</li></ul>
+4. <h4>Strategic Industry & Future Outlook</h4>
+<p>Analysis of winners, losers, policy ramifications, and what to watch next.</p>
+Output clean HTML only. Do not use markdown code blocks.
 
 Title: ${title}
 Source: ${source}
 Content:
-${content.slice(0, 4000)}`;
+${content.slice(0, 5000)}`;
 
         const deepResult = await deepModel.generateContent(deepPrompt);
         tier3DeepDive = deepResult.response.text().replace(/```html|```/g, '').trim();
       } catch (deepErr) {
-        console.warn('Tier 3 deep-dive generation failed:', deepErr.message);
+        console.warn('Long summary generation failed:', deepErr.message);
       }
     }
 

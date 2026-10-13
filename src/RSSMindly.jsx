@@ -264,6 +264,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 const SummaryDisplay = ({ summaryData, onLoadDeepDive, isLoadingDeepDive }) => {
+  const [isBriefExpanded, setIsBriefExpanded] = useState(false);
   if (!summaryData) return null;
 
   const {
@@ -354,27 +355,46 @@ const SummaryDisplay = ({ summaryData, onLoadDeepDive, isLoadingDeepDive }) => {
         </div>
       )}
 
-      {/* STEP 3: TIER 3 DEEP-DIVE EXPANSION */}
+      {/* STEP 3: SUMMARY DEPTH CONTROLS & LONG-FORM SUMMARY */}
       {!isExtractivePreview && (
-        tier3 ? (
-          <div className="mt-2.5 pt-2 border-t border-purple-200 dark:border-purple-800 text-xs bg-purple-100/50 dark:bg-purple-950/40 p-2.5 rounded-lg space-y-1">
-            <div className="font-bold text-purple-800 dark:text-purple-300 flex items-center gap-1.5 mb-1 text-[11px] uppercase tracking-wider">
-              <Cpu size={13} /> Deep-Dive Strategic Intelligence (Tier 3)
+        <div className="mt-3 pt-2.5 border-t border-purple-200/60 dark:border-purple-800/60">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Summary Depth:</span>
+            <div className="flex items-center gap-1 bg-white/70 dark:bg-slate-900/60 p-0.5 rounded-lg border border-gray-200/70 dark:border-gray-700/70 text-[11px]">
+              <span className={`px-2 py-0.5 rounded font-medium transition-colors ${!isBriefExpanded ? 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30' : 'text-gray-500 cursor-pointer'}`} onClick={() => setIsBriefExpanded(false)}>
+                ⚡ 3 Bullets
+              </span>
+              <button
+                onClick={() => {
+                  if (tier3) {
+                    setIsBriefExpanded(!isBriefExpanded);
+                  } else {
+                    setIsBriefExpanded(true);
+                    onLoadDeepDive();
+                  }
+                }}
+                disabled={isLoadingDeepDive}
+                className={`px-2 py-0.5 rounded font-medium transition-colors flex items-center gap-1 disabled:opacity-50 ${isBriefExpanded ? 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30' : 'text-gray-600 dark:text-gray-400 hover:text-purple-600'}`}
+              >
+                {isLoadingDeepDive ? <RefreshCw size={10} className="animate-spin" /> : <FileText size={10} />}
+                <span>{tier3 ? (isBriefExpanded ? '📖 Full Brief (Open)' : '📖 View Full Brief') : '📖 Read Longer Brief'}</span>
+              </button>
             </div>
-            <div className="prose prose-xs dark:prose-invert max-w-none text-gray-800 dark:text-gray-200" dangerouslySetInnerHTML={{ __html: tier3 }} />
           </div>
-        ) : (
-          <div className="mt-2 flex justify-end">
-            <button
-              onClick={onLoadDeepDive}
-              disabled={isLoadingDeepDive}
-              className="flex items-center gap-1.5 text-[11px] font-medium text-purple-700 dark:text-purple-300 bg-purple-100/60 dark:bg-purple-900/40 hover:bg-purple-200/80 dark:hover:bg-purple-900/70 px-2.5 py-1 rounded transition-colors disabled:opacity-50"
-            >
-              {isLoadingDeepDive ? <RefreshCw size={11} className="animate-spin" /> : <Cpu size={11} />}
-              {isLoadingDeepDive ? 'Synthesizing Strategic Context...' : 'Deep Dive: Why This Matters (Tier 3)'}
-            </button>
-          </div>
-        )
+
+          {tier3 && isBriefExpanded && (
+            <div className="mt-2 text-xs bg-purple-100/60 dark:bg-purple-950/50 p-3.5 rounded-xl space-y-2 border border-purple-200/70 dark:border-purple-800/70 animate-in fade-in duration-200 shadow-sm">
+              <div className="font-bold text-purple-900 dark:text-purple-200 flex items-center justify-between text-[11px] uppercase tracking-wider pb-1.5 border-b border-purple-200/60 dark:border-purple-800/60">
+                <span className="flex items-center gap-1.5">
+                  <Cpu size={13} className="text-purple-600 dark:text-purple-400" />
+                  <span>Full Intelligence Brief (Long-Form)</span>
+                </span>
+                <span className="text-[10px] text-purple-600 dark:text-purple-400 font-mono lowercase">verified complete</span>
+              </div>
+              <div className="prose prose-xs dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 [&>h4]:text-purple-900 dark:[&>h4]:text-purple-300 [&>h4]:font-bold [&>h4]:mt-2.5 [&>h4]:mb-1 [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-4" dangerouslySetInnerHTML={{ __html: tier3 }} />
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
