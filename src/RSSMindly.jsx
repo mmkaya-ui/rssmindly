@@ -5,7 +5,7 @@ import {
   Folder, Moon, Sun, Monitor, Search, Loader2,
   ChevronRight, ChevronDown, FileText, Pencil,
   AlertCircle, WifiOff, Filter, GripVertical, Wand2, Key, Info,
-  ShieldCheck, Database, Cpu, Download, Zap
+  ShieldCheck, Database, Cpu, Download, Zap, BookOpen, HelpCircle, CheckCircle2
 } from 'lucide-react';
 import { generateExtractiveMicroSummary } from './lib/extractive.js';
 
@@ -675,6 +675,8 @@ export default function RSSMindlyApp() {
   const [browserUrl, setBrowserUrl] = useState(null);
   const [showAddFeedModal, setShowAddFeedModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [helpTab, setHelpTab] = useState('quickstart');
   const [showBundleModal, setShowBundleModal] = useState(false);
   const [showDigestModal, setShowDigestModal] = useState(false);
   const [feedInput, setFeedInput] = useState('');
@@ -1118,8 +1120,11 @@ export default function RSSMindlyApp() {
             )}
           </div>
         </div>
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-          <button onClick={() => setShowSettingsModal(true)} className="w-full flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-1">
+          <button onClick={() => setShowHelpModal(true)} className="w-full flex items-center gap-2 px-3 py-2 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg transition-colors font-medium text-sm">
+            <BookOpen size={18} className="text-purple-600 dark:text-purple-400" /> <span>User Guide & Manual</span>
+          </button>
+          <button onClick={() => setShowSettingsModal(true)} className="w-full flex items-center gap-2 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-sm">
             <Settings size={18} /> <span>Settings</span>
           </button>
         </div>
@@ -1148,6 +1153,14 @@ export default function RSSMindlyApp() {
                   <WifiOff size={14} /> <span>Offline Mode</span>
                 </div>
               )}
+              <button
+                onClick={() => setShowHelpModal(true)}
+                title="User Manual & Tutorial Guide"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 dark:bg-purple-950/30 dark:border-purple-800 dark:text-purple-300 transition-all"
+              >
+                <BookOpen size={13} />
+                <span className="hidden sm:inline">User Guide</span>
+              </button>
               <button
                 onClick={handlePrewarmTrends}
                 disabled={isPrewarming || articles.length === 0}
@@ -1384,6 +1397,205 @@ export default function RSSMindlyApp() {
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700 text-center text-xs text-gray-400">RSSMindly AI v2.0 (Freemium)</div>
         </div>
       </Modal>
+
+      {/* USER MANUAL & INTERACTIVE GUIDE MODAL */}
+      <Modal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} title="RSSMindly — User Guide & Interactive Manual">
+        <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+          {/* TAB NAVIGATION */}
+          <div className="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-slate-700/70 rounded-xl overflow-x-auto text-xs">
+            {[
+              { id: 'quickstart', label: '🚀 Quickstart' },
+              { id: 'summaries', label: '⚡ Smart Summaries' },
+              { id: 'semantic', label: '🧠 0-Token Cache' },
+              { id: 'byok', label: '🔑 BYOK & Privacy' },
+              { id: 'mobile', label: '📱 Mobile (A2HS)' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setHelpTab(tab.id)}
+                className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-all ${
+                  helpTab === tab.id
+                    ? 'bg-white dark:bg-slate-800 text-purple-700 dark:text-purple-300 shadow-sm border border-gray-200/60 dark:border-gray-700'
+                    : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* TAB 1: QUICKSTART */}
+          {helpTab === 'quickstart' && (
+            <div className="space-y-3.5 text-xs text-gray-700 dark:text-gray-300">
+              <div className="bg-purple-50 dark:bg-purple-950/40 p-3 rounded-xl border border-purple-200 dark:border-purple-800">
+                <h4 className="font-bold text-sm text-purple-900 dark:text-purple-200 flex items-center gap-1.5 mb-1">
+                  <span>Welcome to RSSMindly</span>
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  RSSMindly is an intelligent reader that eliminates news clutter using multi-tier AI summarization and cross-publisher deduplication.
+                </p>
+              </div>
+
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-2.5 p-2.5 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200/70 dark:border-gray-600">
+                  <div className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded text-[11px]">1</div>
+                  <div>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Adding Feeds:</span> Click <span className="font-mono bg-gray-200 dark:bg-slate-600 px-1 py-0.5 rounded text-[10px]">+</span> next to Feeds in the sidebar. Enter any website domain or RSS URL, or pick from popular presets (NYT, Verge, Wired).
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2.5 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200/70 dark:border-gray-600">
+                  <div className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-bold px-2 py-0.5 rounded text-[11px]">2</div>
+                  <div>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Folder Bundles:</span> Group related sources (e.g., Tech, Finance, Science) using <FolderPlus size={12} className="inline mx-0.5 text-purple-500" /> to filter your feeds with one click.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2.5 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200/70 dark:border-gray-600">
+                  <div className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-bold px-2 py-0.5 rounded text-[11px]">3</div>
+                  <div>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">Distraction-Free Reading:</span> Click any article headline to open it in a clean, ad-free reader overlay with dark mode and zero cookie popups.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: SMART SUMMARIES */}
+          {helpTab === 'summaries' && (
+            <div className="space-y-3.5 text-xs text-gray-700 dark:text-gray-300">
+              <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-gray-600 space-y-2">
+                <div className="flex items-center gap-1.5 font-bold text-gray-900 dark:text-white text-xs">
+                  <Cpu size={14} className="text-purple-500" /> Cascading 3-Tier Summaries Explained
+                </div>
+                <p className="text-gray-500 dark:text-gray-400">RSSMindly uses a tiered architecture to maximize speed and eliminate waiting:</p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="p-2.5 rounded-lg border border-purple-200/80 dark:border-purple-800/80 bg-purple-50/60 dark:bg-purple-950/30">
+                  <div className="font-semibold text-purple-900 dark:text-purple-200 flex items-center justify-between mb-1">
+                    <span>⚡ Tier 1: Instant Micro-Summary</span>
+                    <span className="font-mono text-[10px] text-purple-600 dark:text-purple-400">&lt; 1ms • 0 Tokens</span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300">Runs locally in pure client JavaScript. Immediately extracts the primary factual lead sentence while any deeper request loads.</p>
+                </div>
+
+                <div className="p-2.5 rounded-lg border border-blue-200/80 dark:border-blue-800/80 bg-blue-50/60 dark:bg-blue-950/30">
+                  <div className="font-semibold text-blue-900 dark:text-blue-200 flex items-center justify-between mb-1">
+                    <span>⚡ Tier 2: 3-Bullet Flash Takeaways</span>
+                    <span className="font-mono text-[10px] text-blue-600 dark:text-blue-400">Gemini 1.5 Flash</span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300">Structured high-density takeaways covering key catalysts, confirmed numbers, and market ramifications.</p>
+                </div>
+
+                <div className="p-2.5 rounded-lg border border-amber-200/80 dark:border-amber-800/80 bg-amber-50/60 dark:bg-amber-950/30">
+                  <div className="font-semibold text-amber-900 dark:text-amber-200 flex items-center justify-between mb-1">
+                    <span>📖 Tier 3: Long Intelligence Brief (On-Demand)</span>
+                    <span className="font-mono text-[10px] text-amber-600 dark:text-amber-400">4-Part Brief</span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300">Click <b>"📖 View Full Brief"</b> on any article to generate an extensive executive dossier with confirmed figures, quotes, and strategic outlook.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: 0-TOKEN SEMANTIC CACHE */}
+          {helpTab === 'semantic' && (
+            <div className="space-y-3 text-xs text-gray-700 dark:text-gray-300">
+              <div className="p-3 bg-purple-50 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-800 space-y-1.5">
+                <h4 className="font-bold text-sm text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                  <Database size={14} className="text-purple-600 dark:text-purple-400" /> Cross-Publisher Semantic Deduplication
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  When 10 news outlets report on the exact same press release or news event, RSSMindly avoids making 10 expensive duplicate LLM calls.
+                </p>
+              </div>
+
+              <div className="space-y-2 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                <div className="font-semibold text-gray-900 dark:text-white">How it operates:</div>
+                <ul className="list-disc pl-4 space-y-1 text-gray-600 dark:text-gray-300">
+                  <li>Headlines are embedded as 768-dimensional vectors using Google's <code className="bg-gray-200 dark:bg-slate-800 px-1 rounded">text-embedding-004</code>.</li>
+                  <li>Stored in a Supabase <b>pgvector HNSW index</b> with a &gt;0.92 cosine similarity threshold.</li>
+                  <li>Competing wire stories load in <b>45ms at 0 token cost ($0.00)</b> with verified deterministic source figures.</li>
+                  <li>Click the <b>⚡ Pre-Warm</b> button anytime to proactively cluster and cache viral multi-feed stories.</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: BYOK & PRIVACY */}
+          {helpTab === 'byok' && (
+            <div className="space-y-3 text-xs text-gray-700 dark:text-gray-300">
+              <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-gray-600 space-y-2">
+                <h4 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+                  <Key size={14} className="text-blue-500" /> Bring Your Own Key (BYOK)
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  RSSMindly is completely free to use. You can plug in your own free Gemini API key with zero mandatory subscriptions.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="p-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-800 space-y-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">1. Get a Free Key:</span>
+                  <p className="text-gray-500 dark:text-gray-400">Visit <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline font-medium">aistudio.google.com/app/apikey</a> and create a key with 1 click.</p>
+                </div>
+                <div className="p-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-800 space-y-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">2. Paste in Settings:</span>
+                  <p className="text-gray-500 dark:text-gray-400">Open <b>Settings</b> in the sidebar, paste your key, and click Save.</p>
+                </div>
+                <div className="p-2.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-800 space-y-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">3. Complete Local Privacy:</span>
+                  <p className="text-gray-500 dark:text-gray-400">Keys and feed lists reside strictly inside your browser's private <code className="bg-gray-100 dark:bg-slate-900 px-1 rounded">localStorage</code>.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: MOBILE & PWA */}
+          {helpTab === 'mobile' && (
+            <div className="space-y-3 text-xs text-gray-700 dark:text-gray-300">
+              <div className="p-3 bg-purple-50 dark:bg-purple-950/40 rounded-xl border border-purple-200 dark:border-purple-800 space-y-1">
+                <h4 className="font-bold text-sm text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                  <Download size={14} className="text-purple-600 dark:text-purple-400" /> Install as a Native App (PWA)
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300">No App Store or Play Store download required. Install directly to your device home screen.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-gray-600 space-y-1.5">
+                  <div className="font-bold text-gray-900 dark:text-white">🍏 iPhone & iPad (Safari)</div>
+                  <ol className="list-decimal pl-4 space-y-1 text-gray-600 dark:text-gray-300">
+                    <li>Tap the <b>Share</b> icon at bottom.</li>
+                    <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+                    <li>Tap <b>Add</b> in top right.</li>
+                  </ol>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-gray-600 space-y-1.5">
+                  <div className="font-bold text-gray-900 dark:text-white">🤖 Android (Chrome)</div>
+                  <ol className="list-decimal pl-4 space-y-1 text-gray-600 dark:text-gray-300">
+                    <li>Tap the <b>three dots (⋮)</b> in top right.</li>
+                    <li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li>
+                    <li>Confirm installation.</li>
+                  </ol>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-500 italic text-center">Runs fullscreen with native gesture support, dark mode, and offline caching.</p>
+            </div>
+          )}
+
+          <div className="pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs">
+            <span className="text-gray-400">Documentation: <code className="text-gray-500 dark:text-gray-300">docs/USER_MANUAL.md</code></span>
+            <button
+              onClick={() => setShowHelpModal(false)}
+              className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       <Modal isOpen={showDigestModal} onClose={() => setShowDigestModal(false)} title="Your AI Daily Digest">
         {isGeneratingDigest ? (
           <div className="flex flex-col items-center justify-center py-12"><Sparkles size={48} className="text-blue-500 animate-spin mb-4" /><p className="text-lg font-medium animate-pulse">Analyzing articles...</p><p className="text-sm text-gray-500 mt-2">Connecting dots between your selected stories.</p></div>

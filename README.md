@@ -4,6 +4,8 @@ A high-performance news intelligence platform and RSS reader built with **React 
 
 RSSMindly replaces traditional string-based caching with an intelligent **4-Tier Semantic Intelligence & Deduplication Engine** that cuts internet-scale LLM costs by 60–80%, eliminates redundant model calls across competing news publishers, delivers 0ms perceived latency, deterministically guarantees zero hallucinations, and fully supports **Bring Your Own Key (BYOK)**.
 
+> 📖 **User Manual & Interactive Guide:** For instructions on adding feeds, BYOK keys, setting up mobile PWA, and navigating AI summary tiers, check out the [RSSMindly User Manual & Complete Guide](docs/USER_MANUAL.md) or click the **User Guide** button directly in the app.
+
 ---
 
 ## Architecture: The 4-Step Intelligence Pipeline
