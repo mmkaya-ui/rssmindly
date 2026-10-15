@@ -319,7 +319,7 @@ const SummaryDisplay = ({ summaryData, onLoadDeepDive, isLoadingDeepDive }) => {
           ) : isExtractivePreview ? (
             <span className="flex items-center gap-1 text-blue-700 dark:text-blue-400 font-bold animate-pulse">
               <Loader2 size={13} className="animate-spin" />
-              <span>Tier 1 Micro-Summary (0ms)</span>
+              <span>Tier 1 Micro-Summary (&lt;1 ms, local)</span>
             </span>
           ) : (
             <span className="flex items-center gap-1 text-purple-700 dark:text-purple-400 font-bold">
@@ -1382,13 +1382,13 @@ export default function RSSMindlyApp() {
                     <Zap size={12} className="fill-purple-500 text-purple-500" />
                     <span>Cross-Publisher Semantic Cache</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 pl-4">Cosine similarity &gt;0.92 on pgvector eliminates 75% redundant LLM calls across wire services.</p>
+                  <p className="text-[10px] text-gray-500 pl-4">Cosine similarity &ge;0.80 on pgvector lets different outlets covering the same story share one summary instead of a new LLM call.</p>
 
                   <div className="flex items-center gap-1.5 font-semibold text-purple-700 dark:text-purple-300 pt-1">
                     <Zap size={12} className="fill-amber-500 text-amber-500" />
                     <span>Predictive Pre-Warming</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 pl-4">Trend clustering algorithm runs every 15 min to cache viral stories for 0ms load.</p>
+                  <p className="text-[10px] text-gray-500 pl-4">Trend clustering runs every 15 min so stories covered by several outlets are summarised before you open them.</p>
 
                   <div className="flex items-center gap-1.5 font-semibold text-purple-700 dark:text-purple-300 pt-1">
                     <Cpu size={12} />
@@ -1558,8 +1558,8 @@ export default function RSSMindlyApp() {
                 <div className="font-semibold text-gray-900 dark:text-white">How it operates:</div>
                 <ul className="list-disc pl-4 space-y-1 text-gray-600 dark:text-gray-300">
                   <li>Headlines are embedded as 768-dimensional vectors using Google's <code className="bg-gray-200 dark:bg-slate-800 px-1 rounded">gemini-embedding-001</code>.</li>
-                  <li>Stored in a Supabase <b>pgvector HNSW index</b> with a &gt;0.92 cosine similarity threshold.</li>
-                  <li>Competing wire stories load in <b>45ms at 0 token cost ($0.00)</b> with verified deterministic source figures.</li>
+                  <li>Stored in a Supabase <b>pgvector HNSW index</b> with a &ge;0.80 cosine similarity threshold (calibrated for this embedding model).</li>
+                  <li>Competing wire stories reuse an existing summary: <b>no generation call</b>, just one embedding lookup, with the same deterministic source check.</li>
                   <li>Click the <b>⚡ Pre-Warm</b> button anytime to proactively cluster and cache viral multi-feed stories.</li>
                 </ul>
               </div>
