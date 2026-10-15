@@ -14,6 +14,17 @@ import { embedHeadline } from './lib/semantic_embedder.js';
 // Sleep helper for simulating realistic remote API round-trip times
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+// ------------------------------------------------------------------------------
+// SIMULATION CONSTANTS — these are assumptions, NOT measurements.
+// Network latencies are injected with sleep(); token counts are fixed per call.
+// Anything derived only from these (Tier 2/3 latency, token totals) is modelled.
+// Measured for real: Tier 1 extractive latency (runs the production code).
+// Hit/miss decisions use the simulated embedder, so the hit rate is only as
+// meaningful as that embedder (i.e. a harness check, not a production figure).
+// ------------------------------------------------------------------------------
+export const SIMULATED_LATENCY_MS = { semanticHitRpc: 42, geminiGeneration: 240, tier3Generation: 420 };
+export const MODELLED_TOKENS = { tier2Generation: 380, embedding: 40, tier3: 850 };
+
 class MockSupabaseDB {
   constructor() {
     this.table = new Map(); // url -> record
@@ -52,6 +63,8 @@ class MockSupabaseDB {
   }
 }
 
+const avg = (arr, digits) => Number((arr.reduce((a, b) => a + b, 0) / (arr.length || 1)).toFixed(digits));
+
 export async function runReplayEval() {
   const fixturePath = path.resolve('evals/data/feed_fixture.json');
   if (!fs.existsSync(fixturePath)) {
@@ -62,7 +75,7 @@ export async function runReplayEval() {
   const db = new MockSupabaseDB();
 
   console.log('===============================================================');
-  console.log(`⏱️ REPLAYING FEED FIXTURE (${articles.length} ARTICLES)`);
+  console.log(`⏱️ REPLAYING FEED FIXTURE (${articles.length} ARTICLES, mocked Gemini + Supabase)`);
   console.log('===============================================================\n');
 
   let exactHits = 0;
@@ -75,7 +88,8 @@ export async function runReplayEval() {
   const tier2ExactHitLatencies = [];
   const tier3Latencies = [];
 
-  let tokensConsumed = 0;
+  let tier2TokensConsumed = 0;
+  let tier3TokensConsumed = 0;
   let tokensSaved = 0;
 
   for (let i = 0; i < articles.length; i++) {
@@ -83,7 +97,7 @@ export async function runReplayEval() {
     const itemStart = performance.now();
 
     // --------------------------------------------------------------------------
-    // TIER 1: Extractive Micro-Summarizer (< 1ms, 0 tokens)
+    // TIER 1: Extractive Micro-Summarizer (real production code, timed)
     // --------------------------------------------------------------------------
     const t1Start = performance.now();
     const microSummary = generateExtractiveMicroSummary(art.title, art.content);
@@ -91,47 +105,43 @@ export async function runReplayEval() {
     tier1Latencies.push(t1Duration);
 
     // --------------------------------------------------------------------------
-    // STEP 1: Exact URL Check
+    // STEP 1: Exact URL Check (in-memory Map standing in for Supabase)
     // --------------------------------------------------------------------------
     const exactMatch = await db.findByUrl(art.url);
     if (exactMatch) {
       const exactDuration = performance.now() - itemStart;
       tier2ExactHitLatencies.push(exactDuration);
       exactHits++;
-      tokensSaved += 380; // Saved full Tier 2 generation
-      console.log(`[#${String(i + 1).padStart(2)}] ⚡ EXACT CACHE HIT: [${art.source}] "${art.title.slice(0, 42)}..." (${exactDuration.toFixed(2)}ms, 0 tokens)`);
+      tokensSaved += MODELLED_TOKENS.tier2Generation;
+      console.log(`[#${String(i + 1).padStart(2)}] ⚡ EXACT HIT: [${art.source}] "${art.title.slice(0, 42)}..." (${exactDuration.toFixed(2)}ms in-memory)`);
       continue;
     }
 
     // --------------------------------------------------------------------------
-    // STEP 2: Semantic Cache Lookup via Embedding
+    // STEP 2: Semantic Cache Lookup via (simulated) Embedding
     // --------------------------------------------------------------------------
     const embedding = embedHeadline(art.title);
     const semanticMatches = await db.matchSummaries(embedding, 0.92, 48);
 
     if (semanticMatches.length > 0) {
       const hit = semanticMatches[0];
-      // Simulated DB network roundtrip for vector RPC (~42ms)
-      await sleep(42);
+      await sleep(SIMULATED_LATENCY_MS.semanticHitRpc);
       const semDuration = performance.now() - itemStart;
       tier2SemanticHitLatencies.push(semDuration);
       semanticHits++;
-      tokensSaved += 380; // Saved Gemini 1.5 Flash call
-      tokensConsumed += 40; // Only small embedding cost
-
-      console.log(`[#${String(i + 1).padStart(2)}] 🧠 SEMANTIC HIT (${(hit.similarity * 100).toFixed(1)}% match with ${hit.source}): [${art.source}] "${art.title.slice(0, 36)}..." (${semDuration.toFixed(1)}ms, 0 LLM tokens)`);
+      tokensSaved += MODELLED_TOKENS.tier2Generation;
+      tier2TokensConsumed += MODELLED_TOKENS.embedding;
+      console.log(`[#${String(i + 1).padStart(2)}] 🧠 SEMANTIC HIT (sim ${hit.similarity.toFixed(3)} vs ${hit.source}): [${art.source}] "${art.title.slice(0, 36)}..." (${semDuration.toFixed(1)}ms simulated)`);
       continue;
     }
 
     // --------------------------------------------------------------------------
-    // STEP 3: Cache Miss — Gemini 1.5 Flash Generation
+    // STEP 3: Cache Miss — mocked Gemini generation
     // --------------------------------------------------------------------------
-    // Simulate Gemini generation latency (~240ms)
-    await sleep(240);
+    await sleep(SIMULATED_LATENCY_MS.geminiGeneration);
     const summaryHtml = `<ul><li>${art.title}</li><li>Key development reported by ${art.source}.</li></ul>`;
     const groundedness = evaluateGroundedness(summaryHtml, art.content, art.title);
 
-    // Persist to Mock Supabase
     await db.upsert({
       url: art.url,
       title: art.title,
@@ -147,52 +157,47 @@ export async function runReplayEval() {
     const missDuration = performance.now() - itemStart;
     tier2MissLatencies.push(missDuration);
     cacheMisses++;
-    tokensConsumed += 380 + 40; // Generation + Embedding
+    const missTokens = MODELLED_TOKENS.tier2Generation + MODELLED_TOKENS.embedding;
+    tier2TokensConsumed += missTokens;
+    console.log(`[#${String(i + 1).padStart(2)}] ❌ MISS: [${art.source}] "${art.title.slice(0, 42)}..." (${missDuration.toFixed(1)}ms simulated, ${missTokens} modelled tokens)`);
 
-    console.log(`[#${String(i + 1).padStart(2)}] ❌ CACHE MISS: [${art.source}] "${art.title.slice(0, 42)}..." (${missDuration.toFixed(1)}ms, 420 tokens)`);
-
-    // Simulate Tier 3 deep dive for every 4th article
+    // Arbitrary usage assumption: a user opens Tier 3 on every 4th article
     if (i % 4 === 0) {
       const t3Start = performance.now();
-      await sleep(420); // Deep dive generation
-      const t3Duration = performance.now() - t3Start;
-      tier3Latencies.push(t3Duration);
-      tokensConsumed += 850;
+      await sleep(SIMULATED_LATENCY_MS.tier3Generation);
+      tier3Latencies.push(performance.now() - t3Start);
+      tier3TokensConsumed += MODELLED_TOKENS.tier3;
     }
   }
 
-  // Calculate Metrics
   const totalArticles = articles.length;
   const totalHits = exactHits + semanticHits;
   const cacheHitRate = Number(((totalHits / totalArticles) * 100).toFixed(1));
   const semanticHitRate = Number(((semanticHits / totalArticles) * 100).toFixed(1));
 
-  const avgTier1 = Number((tier1Latencies.reduce((a, b) => a + b, 0) / tier1Latencies.length).toFixed(3));
-  const avgMiss = Number((tier2MissLatencies.reduce((a, b) => a + b, 0) / (tier2MissLatencies.length || 1)).toFixed(1));
-  const avgSemHit = Number((tier2SemanticHitLatencies.reduce((a, b) => a + b, 0) / (tier2SemanticHitLatencies.length || 1)).toFixed(1));
-  const avgExactHit = Number((tier2ExactHitLatencies.reduce((a, b) => a + b, 0) / (tier2ExactHitLatencies.length || 1)).toFixed(2));
-  const avgTier3 = Number((tier3Latencies.reduce((a, b) => a + b, 0) / (tier3Latencies.length || 1)).toFixed(1));
+  const avgTier1 = avg(tier1Latencies, 3);
+  const avgExactHit = avg(tier2ExactHitLatencies, 2);
+  const avgSemHit = avg(tier2SemanticHitLatencies, 1);
+  const avgMiss = avg(tier2MissLatencies, 1);
+  const avgTier3 = avg(tier3Latencies, 1);
 
+  // Dedup savings are a Tier 2 property; Tier 3 usage is an assumption, so it is excluded.
+  const tokensConsumed = tier2TokensConsumed;
   const tokenEfficiency = Number(((tokensSaved / (tokensConsumed + tokensSaved)) * 100).toFixed(1));
-  const simulatedCostPer1k = Number(((tokensConsumed / totalArticles) * 1000 * 0.00000015).toFixed(4)); // Flash pricing ~$0.15 / 1M tokens
 
   console.log('\n===============================================================');
-  console.log('📊 REPLAY EVALUATION BENCHMARK RESULTS');
+  console.log('📊 REPLAY RESULTS');
   console.log('===============================================================');
-  console.log(`- Total Articles Replayed:  ${totalArticles}`);
-  console.log(`- Overall Cache Hit Rate:   ${cacheHitRate}% (${totalHits}/${totalArticles})`);
-  console.log(`  ↳ Cross-Publisher Semantic Hits: ${semanticHits} (${semanticHitRate}%)`);
-  console.log(`  ↳ Exact URL Hits:                ${exactHits} (${((exactHits / totalArticles) * 100).toFixed(1)}%)`);
-  console.log(`  ↳ Cache Misses (LLM generated):  ${cacheMisses} (${((cacheMisses / totalArticles) * 100).toFixed(1)}%)`);
-  console.log(`- Token Efficiency:         ${tokenEfficiency}% of tokens saved via deduplication`);
-  console.log(`- Tokens Consumed:          ${tokensConsumed} tokens`);
-  console.log(`- Tokens Saved:             ${tokensSaved} tokens`);
-  console.log('\n--- Latency Breakdown by Tier ---');
-  console.log(`- Tier 1 (Extractive Compressor):  ${avgTier1} ms (0 tokens, client-side)`);
-  console.log(`- Tier 2 Exact Cache Hit:          ${avgExactHit} ms (0 tokens, O(1) hash)`);
-  console.log(`- Tier 2 Semantic Cache Hit:       ${avgSemHit} ms (0 LLM tokens, pgvector HNSW match)`);
-  console.log(`- Tier 2 Cache Miss (LLM Call):    ${avgMiss} ms (Full generation + DB write)`);
-  console.log(`- Tier 3 Deep Dive Brief:          ${avgTier3} ms (4-part strategic analysis)`);
+  console.log('- Hit/miss decided by: SIMULATED embedder (evals/lib/semantic_embedder.js)');
+  console.log(`- Articles replayed:   ${totalArticles}`);
+  console.log(`- Cache hit rate:      ${cacheHitRate}% (${totalHits}/${totalArticles}): ${semanticHits} semantic, ${exactHits} exact, ${cacheMisses} misses`);
+  console.log(`- Tier 2 tokens saved: ${tokenEfficiency}% (MODELLED at ${MODELLED_TOKENS.tier2Generation} gen + ${MODELLED_TOKENS.embedding} emb per call; consumed ${tokensConsumed}, saved ${tokensSaved})`);
+  console.log('\n--- Latency by tier ---');
+  console.log(`- Tier 1 extractive: ${avgTier1} ms   MEASURED (production code, Node, this machine)`);
+  console.log(`- Exact hit:         ${avgExactHit} ms   in-memory Map, not Supabase`);
+  console.log(`- Semantic hit:      ${avgSemHit} ms   SIMULATED (sleep ${SIMULATED_LATENCY_MS.semanticHitRpc} ms)`);
+  console.log(`- Miss:              ${avgMiss} ms   SIMULATED (sleep ${SIMULATED_LATENCY_MS.geminiGeneration} ms)`);
+  console.log(`- Tier 3:            ${avgTier3} ms   SIMULATED (sleep ${SIMULATED_LATENCY_MS.tier3Generation} ms)`);
   console.log('===============================================================\n');
 
   return {
@@ -210,8 +215,10 @@ export async function runReplayEval() {
     avgTier3,
     tokensConsumed,
     tokensSaved,
+    tier3TokensConsumed,
     tokenEfficiency,
-    simulatedCostPer1k
+    simulatedLatencyMs: SIMULATED_LATENCY_MS,
+    modelledTokens: MODELLED_TOKENS
   };
 }
 
