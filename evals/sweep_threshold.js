@@ -10,6 +10,35 @@ import { cosineSimilarity } from '../api/lib/embedding.js';
 import { embedHeadline } from './lib/semantic_embedder.js';
 import { SimpleCanvas } from './lib/png.js';
 
+const PAIR_EMBEDDINGS_PATH = path.resolve('evals/data/pair_embeddings.json');
+const PRODUCTION_THRESHOLD = 0.92;
+
+/**
+ * Picks the embedder. Real cached text-embedding-004 vectors are used when
+ * evals/data/pair_embeddings.json exists (created by evals/embed_pairs.js).
+ * Otherwise falls back to the hand-written rule embedder, which was authored
+ * while looking at this same dataset and is NOT evidence about the real model.
+ */
+function loadEmbedder(pairs) {
+  if (fs.existsSync(PAIR_EMBEDDINGS_PATH)) {
+    const fixture = JSON.parse(fs.readFileSync(PAIR_EMBEDDINGS_PATH, 'utf8'));
+    const missing = pairs.flatMap(p => [p.headline_a, p.headline_b]).filter(h => !fixture.vectors[h]);
+    if (missing.length === 0) {
+      return {
+        kind: 'real',
+        label: `${fixture.model} (cached ${fixture.generated_at.slice(0, 10)}, ${fixture.input})`,
+        embed: (h) => fixture.vectors[h]
+      };
+    }
+    console.warn(`⚠️ pair_embeddings.json is missing ${missing.length} headlines; re-run evals/embed_pairs.js. Falling back to simulated embedder.`);
+  }
+  return {
+    kind: 'simulated',
+    label: 'SIMULATED rule-based embedder (evals/lib/semantic_embedder.js) — tuned on this dataset, not representative of text-embedding-004',
+    embed: embedHeadline
+  };
+}
+
 export function runThresholdSweep() {
   const jsonlPath = path.resolve('evals/data/pairs.jsonl');
   if (!fs.existsSync(jsonlPath)) {
@@ -18,15 +47,17 @@ export function runThresholdSweep() {
 
   const rawLines = fs.readFileSync(jsonlPath, 'utf8').trim().split('\n').filter(Boolean);
   const pairs = rawLines.map(line => JSON.parse(line));
+  const embedder = loadEmbedder(pairs);
 
   console.log('===============================================================');
   console.log(`📊 EVALUATING COSINE THRESHOLD SWEEP (${pairs.length} PAIRS)`);
-  console.log('===============================================================\n');
+  console.log('===============================================================');
+  console.log(`Embedder: ${embedder.label}\n`);
 
   // Precompute embeddings and similarities for all pairs
   const scoredPairs = pairs.map(p => {
-    const vecA = embedHeadline(p.headline_a);
-    const vecB = embedHeadline(p.headline_b);
+    const vecA = embedder.embed(p.headline_a);
+    const vecB = embedder.embed(p.headline_b);
     const sim = Number(cosineSimilarity(vecA, vecB).toFixed(4));
     return { ...p, similarity: sim };
   });
@@ -83,41 +114,78 @@ export function runThresholdSweep() {
 
   for (const r of sweepResults) {
     let note = '';
-    if (r.threshold === bestThreshold) note = '⭐ Optimal F1';
-    else if (r.threshold === 0.92) note = 'Default (Current)';
+    if (r.threshold === bestThreshold) note = 'Peak F1';
+    if (r.threshold === PRODUCTION_THRESHOLD) note = note ? `${note}, production` : 'production';
     console.log(
       `|   ${r.threshold.toFixed(2)}    |   ${r.precision.toFixed(1)}%  |  ${r.recall.toFixed(1)}% |   ${r.f1.toFixed(1)}%  | ${String(r.tp).padStart(2)} | ${String(r.fp).padStart(2)} | ${String(r.tn).padStart(2)} | ${String(r.fn).padStart(2)} | ${note.padEnd(17)} |`
     );
   }
 
-  const defaultRecord = sweepResults.find(r => r.threshold === 0.92);
+  const defaultRecord = sweepResults.find(r => r.threshold === PRODUCTION_THRESHOLD);
   const bestRecord = sweepResults.find(r => r.threshold === bestThreshold);
 
-  console.log('\n--- Sweep Analysis & Recommendation ---');
-  console.log(`- Peak F1 Score: ${bestRecord.f1}% achieved at threshold: ${bestThreshold}`);
-  console.log(`- Current Threshold (0.92): Precision ${defaultRecord.precision}%, Recall ${defaultRecord.recall}%, F1 ${defaultRecord.f1}%`);
+  // Separation: how far apart are the two classes in cosine space?
+  const dupSims = scoredPairs.filter(p => p.is_duplicate).map(p => p.similarity);
+  const nonDupSims = scoredPairs.filter(p => !p.is_duplicate).map(p => p.similarity);
+  const lowestDuplicate = scoredPairs.filter(p => p.is_duplicate).sort((a, b) => a.similarity - b.similarity)[0];
+  const highestNonDuplicate = scoredPairs.filter(p => !p.is_duplicate).sort((a, b) => b.similarity - a.similarity)[0];
+  const separation = {
+    minDuplicate: Math.min(...dupSims),
+    maxNonDuplicate: Math.max(...nonDupSims),
+    lowestDuplicate,
+    highestNonDuplicate
+  };
 
-  const honestAssessment = bestThreshold === 0.92
-    ? 'The 0.92 threshold sits directly at the empirical sweet spot, maximizing F1 while guarding against false-positive cache pollution from hard negatives.'
-    : `The empirical optimal F1 is at ${bestThreshold} (${bestRecord.f1}%). Threshold 0.92 yields ${defaultRecord.f1}% F1, trading slight recall for higher precision (${defaultRecord.precision}% vs ${bestRecord.precision}%), which is a deliberate architectural defense against serving stale/conflicting summaries on hard negatives.`;
+  // Is 0.92 dominated? (another threshold with >= precision AND > recall)
+  const dominatedBy = sweepResults.filter(r =>
+    r.threshold !== PRODUCTION_THRESHOLD &&
+    r.precision >= defaultRecord.precision &&
+    r.recall > defaultRecord.recall
+  );
+  const bestDominator = dominatedBy.sort((a, b) => b.recall - a.recall || b.threshold - a.threshold)[0] || null;
 
-  console.log(`- Trade-Off Assessment: ${honestAssessment}\n`);
+  const lines = [];
+  lines.push(`Peak F1 is ${bestRecord.f1}% at ${bestThreshold}. At ${PRODUCTION_THRESHOLD}: precision ${defaultRecord.precision}%, recall ${defaultRecord.recall}%, F1 ${defaultRecord.f1}%.`);
+  if (bestDominator) {
+    lines.push(`${PRODUCTION_THRESHOLD} is dominated on this dataset: ${bestDominator.threshold} has the same or better precision (${bestDominator.precision}%) and higher recall (${bestDominator.recall}%). The data does not support 0.92 as the best choice.`);
+  } else {
+    lines.push(`No threshold in the sweep beats ${PRODUCTION_THRESHOLD} on both precision and recall.`);
+  }
+  if (separation.minDuplicate > separation.maxNonDuplicate) {
+    lines.push(`Classes are fully separable: every duplicate scores above ${separation.maxNonDuplicate.toFixed(4)} and every non-duplicate scores at or below it. Any threshold in (${separation.maxNonDuplicate.toFixed(4)}, ${separation.minDuplicate.toFixed(4)}] is perfect on this set.`);
+  } else {
+    lines.push(`Classes overlap: lowest-scoring duplicate ${separation.minDuplicate.toFixed(4)} ([${lowestDuplicate.id}]) < highest-scoring non-duplicate ${separation.maxNonDuplicate.toFixed(4)} ([${highestNonDuplicate.id}]). No threshold is perfect.`);
+  }
+  if (embedder.kind === 'simulated') {
+    lines.push('These similarities come from a simulated embedder written against this same dataset. Treat the whole sweep as a harness smoke test, not as evidence for or against 0.92.');
+  }
+  const honestAssessment = lines.join(' ');
+
+  console.log('\n--- Sweep Analysis ---');
+  for (const l of lines) console.log(`- ${l}`);
+  console.log('');
 
   // Render PNG Line Chart
-  renderChartPng(sweepResults, bestThreshold);
+  renderChartPng(sweepResults, bestThreshold, embedder.kind);
 
   return {
     sweepResults,
     bestThreshold,
     bestF1: bestRecord.f1,
-    defaultThreshold: 0.92,
+    defaultThreshold: PRODUCTION_THRESHOLD,
     defaultF1: defaultRecord.f1,
+    defaultRecord,
+    dominatedBy: bestDominator,
+    separation,
+    embedderKind: embedder.kind,
+    embedderLabel: embedder.label,
+    assessmentLines: lines,
     honestAssessment,
     scoredPairs
   };
 }
 
-function renderChartPng(results, _bestT) {
+function renderChartPng(results, _bestT, embedderKind = 'simulated') {
   const width = 720;
   const height = 400;
   const canvas = new SimpleCanvas(width, height, [248, 250, 252, 255]); // slate-50 background
@@ -130,9 +198,12 @@ function renderChartPng(results, _bestT) {
   const chartW = width - padLeft - padRight;
   const chartH = height - padTop - padBottom;
 
-  // Title
+  // Title (bitmap font has no J/K/Q/Z or parentheses, so wording is constrained)
   canvas.drawText('RSSMINDLY COSINE SIMILARITY THRESHOLD SWEEP', padLeft, 16, [15, 23, 42, 255], 2);
-  canvas.drawText('PRECISION (BLUE), RECALL (GREEN), F1 (PURPLE) VS THRESHOLD', padLeft, 34, [100, 116, 139, 255], 1);
+  const subtitle = embedderKind === 'real'
+    ? 'EMBEDDER: TEXT-EMBEDDING-004 CACHED VECTORS - HEADLINES ONLY'
+    : 'EMBEDDER: SIMULATED RULES - NOT A REAL MODEL - HARNESS TEST ONLY';
+  canvas.drawText(subtitle, padLeft, 34, embedderKind === 'real' ? [100, 116, 139, 255] : [225, 29, 72, 255], 1);
 
   // Axes lines
   canvas.drawLine(padLeft, padTop + chartH, padLeft + chartW, padTop + chartH, [148, 163, 184, 255], 2); // X-axis
