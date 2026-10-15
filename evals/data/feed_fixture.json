@@ -1,0 +1,162 @@
+[
+  {
+    "id": "feed_01",
+    "source": "Reuters",
+    "title": "Apple unveils M5 MacBook Pro lineup starting at $1,599",
+    "content": "Apple on Tuesday announced its next-generation M5 MacBook Pro lineup, featuring up to 3.5x faster neural processing for local AI models. The new machines start at $1,599 and will begin shipping next Friday across 30 countries.",
+    "url": "https://reuters.com/technology/apple-m5-macbook-pro-2026-10-14",
+    "pubDate": "2026-10-14T08:00:00Z"
+  },
+  {
+    "id": "feed_02",
+    "source": "CNBC",
+    "title": "Apple announces new M5 laptop line starting at $1,599",
+    "content": "Apple revealed its refreshed MacBook Pro family featuring the M5 processor starting at $1,599, emphasizing on-device machine learning capabilities.",
+    "url": "https://cnbc.com/2026/10/14/apple-announces-m5-laptops.html",
+    "pubDate": "2026-10-14T08:12:00Z"
+  },
+  {
+    "id": "feed_03",
+    "source": "The Verge",
+    "title": "The new M5 MacBook Pro is here with major Neural Engine upgrades",
+    "content": "Apple has officially taken the wraps off its M5 MacBook Pro, promising 3.5x faster neural processing and starting at $1,599.",
+    "url": "https://theverge.com/2026/10/14/apple-m5-macbook-pro-hands-on",
+    "pubDate": "2026-10-14T08:25:00Z"
+  },
+  {
+    "id": "feed_04",
+    "source": "Bloomberg",
+    "title": "Federal Reserve cuts benchmark interest rate by 50 basis points",
+    "content": "The Federal Reserve lowered its key lending rate by half a percentage point to a range of 4.75% to 5.00%, launching an aggressive easing cycle amidst cooling inflation.",
+    "url": "https://bloomberg.com/news/articles/2026-10-14/fed-cuts-rate-50-bps",
+    "pubDate": "2026-10-14T14:00:00Z"
+  },
+  {
+    "id": "feed_05",
+    "source": "Reuters",
+    "title": "Fed lowers key lending rate by half a point in aggressive easing move",
+    "content": "Federal Reserve policymakers delivered a 50 basis point interest rate cut today, bringing benchmark borrowing costs down to 4.75%-5.00%.",
+    "url": "https://reuters.com/markets/us/fed-rate-decision-2026-10-14",
+    "pubDate": "2026-10-14T14:05:00Z"
+  },
+  {
+    "id": "feed_06",
+    "source": "TechCrunch",
+    "title": "OpenAI rolls out SearchGPT integrated directly into ChatGPT",
+    "content": "OpenAI announced today that SearchGPT is now built directly into ChatGPT, giving users real-time web search with links to publisher sources.",
+    "url": "https://techcrunch.com/2026/10/14/openai-searchgpt-chatgpt-launch",
+    "pubDate": "2026-10-14T15:00:00Z"
+  },
+  {
+    "id": "feed_07",
+    "source": "The Verge",
+    "title": "ChatGPT gets real-time web search capabilities in OpenAI update",
+    "content": "ChatGPT can now search the web in real time, delivering timely answers with direct citations from journalism outlets.",
+    "url": "https://theverge.com/2026/10/14/chatgpt-search-engine-launch",
+    "pubDate": "2026-10-14T15:15:00Z"
+  },
+  {
+    "id": "feed_08",
+    "source": "Ars Technica",
+    "title": "SpaceX Starship rocket completes historic catch by mechanical arms",
+    "content": "SpaceX pulled off an unprecedented engineering feat today, catching its Super Heavy booster mid-air using tower chopstick arms at Starbase Texas.",
+    "url": "https://arstechnica.com/space/2026/10/spacex-starship-booster-catch",
+    "pubDate": "2026-10-14T16:00:00Z"
+  },
+  {
+    "id": "feed_09",
+    "source": "Space.com",
+    "title": "SpaceX catches returning Super Heavy booster with tower chopstick arms",
+    "content": "During Flight 5, SpaceX successfully caught the returning 232-foot rocket booster as it decelerated precisely between the mechanical arms of the launch tower.",
+    "url": "https://space.com/spacex-starship-flight-5-catch-success",
+    "pubDate": "2026-10-14T16:20:00Z"
+  },
+  {
+    "id": "feed_10",
+    "source": "Reuters",
+    "title": "TSMC reports 54 percent jump in net profit fueled by AI chip demand",
+    "content": "Taiwan Semiconductor Manufacturing Co posted a 54% jump in third-quarter net profit, beating estimates as demand for AI hardware from Nvidia surged.",
+    "url": "https://reuters.com/technology/tsmc-q3-profit-jump-2026-10-14",
+    "pubDate": "2026-10-14T06:00:00Z"
+  },
+  {
+    "id": "feed_11",
+    "source": "Bloomberg",
+    "title": "TSMC quarterly net income climbs 54% as Nvidia and Apple orders accelerate",
+    "content": "TSMC reported revenue and earnings beats with quarterly net income surging 54% year-over-year, reaffirming high capital expenditure guidance.",
+    "url": "https://bloomberg.com/news/tsmc-earnings-surge-ai-demand",
+    "pubDate": "2026-10-14T06:30:00Z"
+  },
+  {
+    "id": "feed_12",
+    "source": "CNBC",
+    "title": "Tesla third quarter profit surges as vehicle deliveries rebound",
+    "content": "Tesla shares jumped 12% in extended trading after third-quarter profit beat Wall Street expectations, supported by lower cost per vehicle and energy storage growth.",
+    "url": "https://cnbc.com/2026/10/14/tesla-q3-earnings-report.html",
+    "pubDate": "2026-10-14T20:00:00Z"
+  },
+  {
+    "id": "feed_13",
+    "source": "WSJ",
+    "title": "Tesla Q3 net income tops expectations aided by automotive margin growth",
+    "content": "Automaker Tesla reported expanding gross margins and net profit growth in the third quarter as global delivery volumes stabilized.",
+    "url": "https://wsj.com/business/autos/tesla-third-quarter-earnings-2026",
+    "pubDate": "2026-10-14T20:20:00Z"
+  },
+  {
+    "id": "feed_14",
+    "source": "BBC News",
+    "title": "EU fines Meta 798 million euros over marketplace antitrust violations",
+    "content": "The European Commission has imposed a 798 million euro penalty on Meta for abusing its dominant market position by tying Facebook Marketplace to Facebook.",
+    "url": "https://bbc.com/news/technology-meta-eu-fine-marketplace",
+    "pubDate": "2026-10-14T11:00:00Z"
+  },
+  {
+    "id": "feed_15",
+    "source": "Politico EU",
+    "title": "European Commission slaps Meta with 798M euro penalty over classified ads",
+    "content": "Brussels antitrust enforcers issued a 798 million euro fine against Meta Platforms today, ordering the company to end tying practices.",
+    "url": "https://politico.eu/article/meta-fine-marketplace-antitrust",
+    "pubDate": "2026-10-14T11:18:00Z"
+  },
+  {
+    "id": "feed_16",
+    "source": "Seattle Times",
+    "title": "Boeing workers vote to accept contract offer ending seven-week strike",
+    "content": "Machinists at Boeing voted 59% to approve a new contract providing a 38% wage hike, concluding a 53-day strike across Washington and Oregon.",
+    "url": "https://seattletimes.com/business/boeing-machinists-vote-approve-contract",
+    "pubDate": "2026-10-14T22:00:00Z"
+  },
+  {
+    "id": "feed_17",
+    "source": "AP News",
+    "title": "Boeing machinists approve new union contract to conclude 53-day walkout",
+    "content": "More than 33,000 Boeing machinists will return to assembly lines this week after approving a four-year collective bargaining agreement.",
+    "url": "https://apnews.com/article/boeing-strike-ends-machinists-vote",
+    "pubDate": "2026-10-14T22:30:00Z"
+  },
+  {
+    "id": "feed_18",
+    "source": "Local News",
+    "title": "Reykjanes volcano erupts again on southwestern Iceland peninsula",
+    "content": "A volcanic fissure opened near Grindavik on Wednesday, prompting civil protection officials to order defensive barricades closed.",
+    "url": "https://icelandmonitor.mbl.is/news/nature/volcano-eruption-reykjanes-oct14",
+    "pubDate": "2026-10-14T05:00:00Z"
+  },
+  {
+    "id": "feed_19",
+    "source": "Science Daily",
+    "title": "James Webb Space Telescope detects water vapor on temperate rocky exoplanet",
+    "content": "Astronomers analyzing transmission spectra from the James Webb Space Telescope have identified atmospheric water vapor signatures on a nearby exoplanet.",
+    "url": "https://sciencedaily.com/releases/2026/10/jwst-exoplanet-water.htm",
+    "pubDate": "2026-10-14T13:00:00Z"
+  },
+  {
+    "id": "feed_20",
+    "source": "Reuters",
+    "title": "Apple unveils M5 MacBook Pro lineup starting at $1,599",
+    "content": "Apple on Tuesday announced its next-generation M5 MacBook Pro lineup, featuring up to 3.5x faster neural processing for local AI models.",
+    "url": "https://reuters.com/technology/apple-m5-macbook-pro-2026-10-14",
+    "pubDate": "2026-10-14T08:00:00Z"
+  }
+]
