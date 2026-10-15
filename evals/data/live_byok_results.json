@@ -1,0 +1,431 @@
+{
+  "summary": {
+    "generatedAt": "2026-10-15T11:48:47.000Z",
+    "threshold": 0.8,
+    "embeddingModel": "gemini-embedding-001",
+    "generationModels": [
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite"
+    ],
+    "articles": 20,
+    "generated": 10,
+    "semanticHits": 9,
+    "exactHits": 1,
+    "errors": 0,
+    "generateMs": {
+      "p50": 646,
+      "p95": 893,
+      "max": 893
+    },
+    "embedMs": {
+      "p50": 247,
+      "p95": 2229
+    },
+    "tier1MsAvg": 0.066,
+    "tokensPerSummary": {
+      "prompt": 131,
+      "output": 49,
+      "thought": 0
+    },
+    "regenerated": 0,
+    "firstPassFlagged": 0,
+    "finalGrounded": 10,
+    "fallbackUsed": 0,
+    "tier3": {
+      "httpStatus": 200,
+      "ms": 2741,
+      "usage": {
+        "promptTokens": 421,
+        "outputTokens": 540,
+        "thoughtTokens": 0
+      },
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite"
+      ],
+      "chars": 2565
+    },
+    "keyLeakedIntoLogsOrResponses": false
+  },
+  "rows": [
+    {
+      "n": 1,
+      "source": "Reuters",
+      "title": "Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "url": "https://reuters.com/technology/apple-m5-macbook-pro-2026-10-14",
+      "tier1Ms": 0.5041000000000082,
+      "embedMs": 329.41179999999997,
+      "bestSimilarity": null,
+      "bestMatch": null,
+      "httpStatus": 200,
+      "generateMs": 711.0246,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 155,
+        "outputTokens": 65,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 0.9,
+      "finalScore": 0.9,
+      "isGrounded": true,
+      "violations": [
+        "entity:Shipments"
+      ],
+      "summary": "<ul>\n<li>Apple announced its new M5 MacBook Pro lineup starting at $1,599 on Tuesday.</li>\n<li>The new laptops feature up to 3.5x faster neural processing for local AI models.</li>\n<li>Shipments are scheduled to begin next Friday across 30 countries.</li>\n</ul>"
+    },
+    {
+      "n": 2,
+      "source": "CNBC",
+      "title": "Apple announces new M5 laptop line starting at $1,599",
+      "url": "https://cnbc.com/2026/10/14/apple-announces-m5-laptops.html",
+      "tier1Ms": 0.059099999999943975,
+      "embedMs": 218.07639999999992,
+      "bestSimilarity": 0.9223,
+      "bestMatch": "Reuters: Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 3,
+      "source": "The Verge",
+      "title": "The new M5 MacBook Pro is here with major Neural Engine upgrades",
+      "url": "https://theverge.com/2026/10/14/apple-m5-macbook-pro-hands-on",
+      "tier1Ms": 0.036800000000084765,
+      "embedMs": 250.60699999999997,
+      "bestSimilarity": 0.9224,
+      "bestMatch": "Reuters: Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 4,
+      "source": "Bloomberg",
+      "title": "Federal Reserve cuts benchmark interest rate by 50 basis points",
+      "url": "https://bloomberg.com/news/articles/2026-10-14/fed-cuts-rate-50-bps",
+      "tier1Ms": 0.037299999999959255,
+      "embedMs": 224.41440000000011,
+      "bestSimilarity": 0.492,
+      "bestMatch": "Reuters: Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "httpStatus": 200,
+      "generateMs": 892.5207,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 138,
+        "outputTokens": 56,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n  <li>The Federal Reserve reduced its benchmark interest rate by 50 basis points to a new range of 4.75% to 5.00%.</li>\n  <li>The rate cut initiates an aggressive easing cycle driven by cooling inflation.</li>\n</ul>"
+    },
+    {
+      "n": 5,
+      "source": "Reuters",
+      "title": "Fed lowers key lending rate by half a point in aggressive easing move",
+      "url": "https://reuters.com/markets/us/fed-rate-decision-2026-10-14",
+      "tier1Ms": 0.060799999999744614,
+      "embedMs": 228.5027,
+      "bestSimilarity": 0.9212,
+      "bestMatch": "Bloomberg: Federal Reserve cuts benchmark interest rate by 50 basis points",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 6,
+      "source": "TechCrunch",
+      "title": "OpenAI rolls out SearchGPT integrated directly into ChatGPT",
+      "url": "https://techcrunch.com/2026/10/14/openai-searchgpt-chatgpt-launch",
+      "tier1Ms": 0.03929999999991196,
+      "embedMs": 240.30899999999974,
+      "bestSimilarity": 0.5274,
+      "bestMatch": "Reuters: Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "httpStatus": 200,
+      "generateMs": 503.3915999999999,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 124,
+        "outputTokens": 39,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>OpenAI announced that SearchGPT is now built directly into ChatGPT.</li>\n<li>The integration provides users with real-time web search capabilities alongside links to publisher sources.</li>\n</ul>"
+    },
+    {
+      "n": 7,
+      "source": "The Verge",
+      "title": "ChatGPT gets real-time web search capabilities in OpenAI update",
+      "url": "https://theverge.com/2026/10/14/chatgpt-search-engine-launch",
+      "tier1Ms": 0.05639999999948486,
+      "embedMs": 248.0742999999993,
+      "bestSimilarity": 0.8473,
+      "bestMatch": "TechCrunch: OpenAI rolls out SearchGPT integrated directly into ChatGPT",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 8,
+      "source": "Ars Technica",
+      "title": "SpaceX Starship rocket completes historic catch by mechanical arms",
+      "url": "https://arstechnica.com/space/2026/10/spacex-starship-booster-catch",
+      "tier1Ms": 0.030399999999644933,
+      "embedMs": 252.33219999999983,
+      "bestSimilarity": 0.4985,
+      "bestMatch": "TechCrunch: OpenAI rolls out SearchGPT integrated directly into ChatGPT",
+      "httpStatus": 200,
+      "generateMs": 534.7480999999998,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 127,
+        "outputTokens": 45,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>SpaceX successfully caught its Super Heavy booster mid-air using tower chopstick arms at Starbase Texas.</li>\n<li>The unprecedented engineering feat marked a historic milestone for the Starship rocket program.</li>\n</ul>"
+    },
+    {
+      "n": 9,
+      "source": "Space.com",
+      "title": "SpaceX catches returning Super Heavy booster with tower chopstick arms",
+      "url": "https://space.com/spacex-starship-flight-5-catch-success",
+      "tier1Ms": 0.03610000000026048,
+      "embedMs": 233.51810000000023,
+      "bestSimilarity": 0.8824,
+      "bestMatch": "Ars Technica: SpaceX Starship rocket completes historic catch by mechanical arms",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 10,
+      "source": "Reuters",
+      "title": "TSMC reports 54 percent jump in net profit fueled by AI chip demand",
+      "url": "https://reuters.com/technology/tsmc-q3-profit-jump-2026-10-14",
+      "tier1Ms": 0.025599999999940337,
+      "embedMs": 2229.4042999999992,
+      "bestSimilarity": 0.5498,
+      "bestMatch": "Reuters: Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "httpStatus": 200,
+      "generateMs": 590.9451000000008,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 132,
+        "outputTokens": 45,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>Taiwan Semiconductor Manufacturing Co reported a 54% jump in third-quarter net profit, beating market estimates.</li>\n<li>The profit growth was driven by surging demand for AI hardware from Nvidia.</li>\n</ul>"
+    },
+    {
+      "n": 11,
+      "source": "Bloomberg",
+      "title": "TSMC quarterly net income climbs 54% as Nvidia and Apple orders accelerate",
+      "url": "https://bloomberg.com/news/tsmc-earnings-surge-ai-demand",
+      "tier1Ms": 0.038499999998748535,
+      "embedMs": 247.46209999999883,
+      "bestSimilarity": 0.8395,
+      "bestMatch": "Reuters: TSMC reports 54 percent jump in net profit fueled by AI chip demand",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 12,
+      "source": "CNBC",
+      "title": "Tesla third quarter profit surges as vehicle deliveries rebound",
+      "url": "https://cnbc.com/2026/10/14/tesla-q3-earnings-report.html",
+      "tier1Ms": 0.038499999998748535,
+      "embedMs": 253.422700000001,
+      "bestSimilarity": 0.676,
+      "bestMatch": "Reuters: TSMC reports 54 percent jump in net profit fueled by AI chip demand",
+      "httpStatus": 200,
+      "generateMs": 889.3536999999997,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 127,
+        "outputTokens": 47,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>Tesla shares jumped 12% in extended trading after its third-quarter profit beat Wall Street expectations.</li>\n<li>The profit surge was supported by a lower cost per vehicle and growth in energy storage.</li>\n</ul>"
+    },
+    {
+      "n": 13,
+      "source": "WSJ",
+      "title": "Tesla Q3 net income tops expectations aided by automotive margin growth",
+      "url": "https://wsj.com/business/autos/tesla-third-quarter-earnings-2026",
+      "tier1Ms": 0.03470000000015716,
+      "embedMs": 269.2656999999999,
+      "bestSimilarity": 0.8252,
+      "bestMatch": "CNBC: Tesla third quarter profit surges as vehicle deliveries rebound",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 14,
+      "source": "BBC News",
+      "title": "EU fines Meta 798 million euros over marketplace antitrust violations",
+      "url": "https://bbc.com/news/technology-meta-eu-fine-marketplace",
+      "tier1Ms": 0.057199999999284046,
+      "embedMs": 245.86319999999978,
+      "bestSimilarity": 0.5066,
+      "bestMatch": "Reuters: Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "httpStatus": 200,
+      "generateMs": 722.4292999999998,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 129,
+        "outputTokens": 51,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>The European Commission imposed a 798 million euro penalty on Meta.</li>\n<li>The penalty was issued due to Meta abusing its dominant market position.</li>\n<li>Meta violated antitrust rules by tying Facebook Marketplace to Facebook.</li>\n</ul>"
+    },
+    {
+      "n": 15,
+      "source": "Politico EU",
+      "title": "European Commission slaps Meta with 798M euro penalty over classified ads",
+      "url": "https://politico.eu/article/meta-fine-marketplace-antitrust",
+      "tier1Ms": 0.03809999999975844,
+      "embedMs": 239.89389999999912,
+      "bestSimilarity": 0.9017,
+      "bestMatch": "BBC News: EU fines Meta 798 million euros over marketplace antitrust violations",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 16,
+      "source": "Seattle Times",
+      "title": "Boeing workers vote to accept contract offer ending seven-week strike",
+      "url": "https://seattletimes.com/business/boeing-machinists-vote-approve-contract",
+      "tier1Ms": 0.039399999999659485,
+      "embedMs": 260.14790000000175,
+      "bestSimilarity": 0.5547,
+      "bestMatch": "Ars Technica: SpaceX Starship rocket completes historic catch by mechanical arms",
+      "httpStatus": 200,
+      "generateMs": 601.1342999999997,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 137,
+        "outputTokens": 52,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>Boeing machinists in Washington and Oregon voted 59% to approve a new contract, ending a 53-day strike.</li>\n<li>The newly accepted contract provides workers with a 38% wage hike.</li>\n</ul>"
+    },
+    {
+      "n": 17,
+      "source": "AP News",
+      "title": "Boeing machinists approve new union contract to conclude 53-day walkout",
+      "url": "https://apnews.com/article/boeing-strike-ends-machinists-vote",
+      "tier1Ms": 0.03499999999985448,
+      "embedMs": 212.4359999999997,
+      "bestSimilarity": 0.8705,
+      "bestMatch": "Seattle Times: Boeing workers vote to accept contract offer ending seven-week strike",
+      "outcome": "semantic_hit"
+    },
+    {
+      "n": 18,
+      "source": "Local News",
+      "title": "Reykjanes volcano erupts again on southwestern Iceland peninsula",
+      "url": "https://icelandmonitor.mbl.is/news/nature/volcano-eruption-reykjanes-oct14",
+      "tier1Ms": 0.035199999998440035,
+      "embedMs": 238.8832999999995,
+      "bestSimilarity": 0.5082,
+      "bestMatch": "BBC News: EU fines Meta 798 million euros over marketplace antitrust violations",
+      "httpStatus": 200,
+      "generateMs": 645.506800000001,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 120,
+        "outputTokens": 46,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>A volcanic fissure erupted near Grindavik on Wednesday on the southwestern Iceland peninsula in the Reykjanes region.</li>\n<li>Civil protection officials responded to the eruption by ordering defensive barricades to be closed.</li>\n</ul>"
+    },
+    {
+      "n": 19,
+      "source": "Science Daily",
+      "title": "James Webb Space Telescope detects water vapor on temperate rocky exoplanet",
+      "url": "https://sciencedaily.com/releases/2026/10/jwst-exoplanet-water.htm",
+      "tier1Ms": 0.06850000000122236,
+      "embedMs": 1983.2490000000016,
+      "bestSimilarity": 0.5295,
+      "bestMatch": "Ars Technica: SpaceX Starship rocket completes historic catch by mechanical arms",
+      "httpStatus": 200,
+      "generateMs": 742.1935999999987,
+      "outcome": "miss_generated",
+      "models": [
+        "gemini-3.5-flash-lite"
+      ],
+      "usage": {
+        "promptTokens": 125,
+        "outputTokens": 43,
+        "thoughtTokens": 0
+      },
+      "regenerated": false,
+      "initialScore": 1,
+      "finalScore": 1,
+      "isGrounded": true,
+      "violations": [],
+      "summary": "<ul>\n<li>Astronomers used transmission spectra from the James Webb Space Telescope to analyze a nearby exoplanet.</li>\n<li>The analysis identified atmospheric water vapor signatures on the temperate rocky exoplanet.</li>\n</ul>"
+    },
+    {
+      "n": 20,
+      "source": "Reuters",
+      "title": "Apple unveils M5 MacBook Pro lineup starting at $1,599",
+      "url": "https://reuters.com/technology/apple-m5-macbook-pro-2026-10-14",
+      "tier1Ms": 0.0511000000005879,
+      "outcome": "exact_hit"
+    }
+  ]
+}
