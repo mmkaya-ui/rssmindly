@@ -1,7 +1,7 @@
 // ==============================================================================
 // RSSMindly — Comprehensive Unit Tests
 // Tests cosineSimilarity, clustering, extractNumbersAndMetrics edge cases,
-// currency encoding (mojibake prevention), and groundedness verification.
+// encoding-safe currency regexes (\u escapes), and groundedness verification.
 // ==============================================================================
 
 import { cosineSimilarity } from '../api/lib/embedding.js';
@@ -100,11 +100,11 @@ assert(timeClusters.length === 2, 'Articles outside 4-hour window remain in sepa
 
 
 // ----------------------------------------------------------------------------
-// 3. EXTRACT NUMBERS & METRICS EDGE CASES & ENCODING (MOJIBAKE)
+// 3. EXTRACT NUMBERS & METRICS EDGE CASES & ENCODING-SAFE CURRENCY REGEXES
 // ----------------------------------------------------------------------------
 console.log('\n--- 3. Testing extractNumbersAndMetrics & Currency Encoding ---');
 
-// Encoding / Mojibake tests: Unicode currency symbols
+// Currency symbols written as \u escapes in source so the regex does not depend on file encoding
 const unicodeCurrencyText = 'Prices: $1,599 in US, \u20AC500 in EU, \u00A3450 in UK, \u00A560,000 in Japan.';
 const extractedCurrencies = extractNumbersAndMetrics(unicodeCurrencyText);
 assert(extractedCurrencies.some(m => m.raw.includes('1,599') && m.raw.includes('$')), 'Extracted USD ($) correctly');

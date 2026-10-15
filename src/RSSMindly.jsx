@@ -349,9 +349,9 @@ const SummaryDisplay = ({ summaryData, onLoadDeepDive, isLoadingDeepDive }) => {
         <div className="flex items-center justify-between text-[11px] mt-2.5 pt-2 border-t border-emerald-200/50 dark:border-emerald-800/50">
           <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
             <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
-            <span>Factually Grounded ({Math.round(groundednessScore * 100)}% verified against source)</span>
+            <span>Source check: {Math.round(groundednessScore * 100)}% of numbers &amp; names found in article</span>
           </div>
-          <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">Zero-Hallucination Verified</span>
+          <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono">Deterministic check</span>
         </div>
       )}
 
@@ -1390,9 +1390,9 @@ export default function RSSMindlyApp() {
 
                   <div className="flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400 pt-1">
                     <ShieldCheck size={12} />
-                    <span>Zero-Hallucination Groundedness</span>
+                    <span>Deterministic Groundedness Check</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 pl-4">Deterministic verification of all numbers, figures, and named entities.</p>
+                  <p className="text-[10px] text-gray-500 pl-4">Numbers, figures, and named entities are string-matched against the source. Reworded meaning (e.g. negation) is not detected.</p>
                 </div>
               </div>
             ) : (

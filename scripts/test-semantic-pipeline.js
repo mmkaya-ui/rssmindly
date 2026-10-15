@@ -41,9 +41,9 @@ assert((t1 - t0) < 5, `Executed in ${(t1 - t0).toFixed(2)}ms (< 5ms instant exec
 assert(microSummary.includes('Apple') && (microSummary.includes('M5') || microSummary.includes('MacBook')), 'Extracted key lead entity');
 
 // --------------------------------------------------------------------------
-// TEST 2: Deterministic Groundedness & Zero Hallucination Guarantee (Step 4)
+// TEST 2: Deterministic Groundedness Check (Step 4)
 // --------------------------------------------------------------------------
-console.log('\n--- Step 4: Groundedness & Zero Hallucination Verifier ---');
+console.log('\n--- Step 4: Deterministic Groundedness Check ---');
 
 // Case A: Factual summary directly supported by text
 const groundedSummaryHtml = `<ul>

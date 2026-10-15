@@ -3,7 +3,7 @@
 // Step 1: Semantic Deduping via Embedding Fingerprints (Cross-Publisher Cache)
 // Step 2: Predictive Pre-Warming via Trend Clustering
 // Step 3: Cascading Multi-Tier Speculative Summarization (Tier 1, Tier 2, Tier 3)
-// Step 4: Self-Evaluating Groundedness & Source Attribution (Zero Hallucination)
+// Step 4: Deterministic Groundedness Check & Source Attribution
 // ==============================================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -258,7 +258,7 @@ ${content.slice(0, 4000)}`;
     let summaryHtml = tier2Result.response.text().replace(/```html|```/g, '').trim();
 
     // --------------------------------------------------------------------------
-    // STEP 4: SELF-EVALUATING GROUNDEDNESS & ZERO HALLUCINATION RE-GENERATION
+    // STEP 4: DETERMINISTIC GROUNDEDNESS CHECK & STRICT RE-GENERATION
     // --------------------------------------------------------------------------
     let groundedness = evaluateGroundedness(summaryHtml, content, title);
 
