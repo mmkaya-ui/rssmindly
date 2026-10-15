@@ -1,6 +1,6 @@
 # RSSMindly
 
-> **High-efficiency RSS reader featuring cross-publisher semantic caching, instant multi-tier summaries, and deterministic numeric groundedness verification.**
+> RSS reader with cross-publisher semantic caching, tiered summaries, and a deterministic check that every number and name in a summary appears in the source article.
 
 [![CI Pipeline](https://github.com/mmkaya-ui/rssmindly/actions/workflows/ci.yml/badge.svg)](https://github.com/mmkaya-ui/rssmindly/actions/workflows/ci.yml)
 [![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
@@ -14,151 +14,135 @@
 
 ## Demo
 
-![RSSMindly Demo](docs/demo.gif)
-*Demo: Real-time RSS ingestion, instant < 1ms Tier 1 extractive preview, 42ms cross-publisher semantic deduplication, and verified 3-bullet summary.*
+> **TODO: demo GIF not recorded yet.** Planned: add a feed, show the instant Tier 1 preview, open a second outlet's version of the same story (semantic cache hit), then the 3-bullet summary with its source-check badge. Save as `docs/demo.gif` and replace this block.
 
 ---
 
-## The Problem with AI Feed Readers
+## The problem
 
-When a major tech or financial story breaks (e.g., an earnings announcement, central bank rate decision, or major hardware release), 10 to 20 different publishers (Reuters, CNBC, The Verge, Bloomberg, AP News) syndicate near-identical stories within a 30-minute window.
+When a story breaks, many outlets publish near-identical versions within minutes. A naive AI reader:
 
-Most AI feed readers handle this naively:
-1. **Redundant Token Spend:** Every distinct URL triggers a separate LLM call. 15 wire outlets = 15x token consumption on identical information.
-2. **Perceived Latency:** The reader waits on a 2.0–4.0 second spinner for every single article.
-3. **Silent Metric Hallucinations:** Generative models occasionally fabricate prices, percentages, or dates with no automated verification step.
-4. **Subscription Paywalls:** Readers are locked into recurring SaaS tiers instead of bringing their own free API keys.
+1. **Pays for the same summary repeatedly**: every distinct URL triggers a new LLM call.
+2. **Makes the reader wait**: nothing is shown until the LLM responds.
+3. **Trusts the model blindly**: invented prices or percentages go unchecked.
+4. **Locks users into a subscription**: no way to bring your own key.
 
-RSSMindly replaces this with an empirical, multi-tier caching and verification pipeline.
-
----
-
-## Measured Performance & Empirical Benchmarks
-
-All metrics below are generated directly from the reproducible offline evaluation harness (`npm run eval`). Complete logs and data tables are documented in [`evals/RESULTS.md`](evals/RESULTS.md).
-
-### Latency by Architectural Tier
-
-| Tier | Mechanism | Measured Latency | Token Cost | Source |
-|---|---|---|---|---|
-| **Tier 1 (Extractive Micro-Summary)** | Client-side heuristic lead sentence | **0.054 ms** | **0 tokens ($0.00)** | `evals/eval_replay.js` |
-| **Tier 2 Exact Cache Hit** | O(1) URL hash lookup | **0.04 ms** | **0 tokens ($0.00)** | `evals/eval_replay.js` |
-| **Tier 2 Semantic Cache Hit** | 768-dim embedding + `pgvector` HNSW | **42.3 ms** | **0 LLM tokens** | `evals/eval_replay.js` |
-| **Tier 2 Cache Miss** | Gemini 1.5 Flash generation + DB write | **240.7 ms** | **420 tokens** | `evals/eval_replay.js` |
-| **Tier 3 Deep Dive Brief** | 4-part structured intelligence brief | **420.2 ms** | **850 tokens** | `evals/eval_replay.js` |
-
-### Cache Hit Rate & Token Savings (20-Article Multi-Publisher Replay)
-* **Overall Cache Hit Rate:** **25%** (5/20 articles reused existing summaries).
-  * *Cross-Publisher Semantic Hits:* **4** (20%) — deduplicated across different news outlets.
-  * *Exact URL Hits:* **1** (5%).
-* **Token Efficiency:** **18.9%** tokens saved on the first ingestion pass (1,900 tokens saved out of 10,060 potential tokens).
-* **Cross-Publisher Match Example:**
-  * Reuters: *"Apple unveils M5 MacBook Pro lineup starting at $1,599"* (Cache Miss $\to$ generated & indexed)
-  * CNBC: *"Apple announces new M5 laptop line starting at $1,599"* (⚡ Semantic Hit at 99.7% similarity $\to$ served in 42ms with 0 LLM tokens).
-
-### Groundedness Verification Benchmark (30 Test Cases)
-Evaluated in `evals/eval_groundedness.js` on 30 test cases containing clean summaries, injected incorrect numbers/currencies/percentages, fake entities, and edge-case currency encodings:
-* **Detection Accuracy:** **100%** (30/30 test cases correctly classified).
-* **Detection Recall:** **100%** (16 of 16 injected metric and entity hallucinations caught).
-* **Precision:** **100%** (0 false alarms recorded on clean grounded text).
-* **False Positives:** **0**
-* **False Negatives:** **0**
+RSSMindly addresses each of these: semantic caching across outlets, an instant extractive preview, a deterministic source check, and bring-your-own-key.
 
 ---
 
-## Architecture: The 4-Step Intelligence Pipeline
+## What the evidence shows (and doesn't)
+
+All figures come from `npm run eval` and `npm test`; full output in [`evals/RESULTS.md`](evals/RESULTS.md). Be aware of what is simulated.
+
+| Claim | Evidence | Status |
+|---|---|---|
+| Tier 1 preview is effectively instant | 0.054–0.066 ms/article across today's runs (production code, dev machine; varies per run) | **Measured** |
+| Groundedness check catches injected errors (honest estimate) | Held-out set, 20 cases: 50% accuracy, 62.5% precision, 41.7% recall | **Measured**, AI-authored cases |
+| Groundedness on the tuning set | Dev set, 30 cases: 83.3% → 100% accuracy after fixes | **Optimistic**: code was tuned on it |
+| 0.92 is the right cosine threshold | Sweep is dominated by 0.80/0.81 on this data, *but* similarities come from a simulated embedder | **Unproven** |
+| Semantic hits are fast and skip the LLM | Hit path makes no LLM call by construction; 42 ms / 240 ms latencies are `sleep()` values | **Latency simulated** |
+| Cache saves tokens | 5/20 hits and 22.7% Tier 2 tokens saved in a replay with fixed token constants and the simulated embedder | **Modelled** |
+
+> [!IMPORTANT]
+> On the held-out set the current `groundedness.js` scores **lower** than the original (50% vs 60% accuracy). Three regressions came from the tuning: `Price` added to the stopword list hides real surnames (h06), currency normalisation lets `$500 million` match `€500 million` (h18), and single-digit checking flags `3` when the source says "Three" (h08). See [Limitations](#limitations).
+
+---
+
+## Architecture
 
 ```mermaid
 flowchart TD
-    A[Incoming RSS Article] --> B[Tier 1: Client Extractive Compressor]
-    B -->|0.054ms Latency • $0 Cost| UI1[Instant 1-Sentence Micro-Summary Preview]
-    
-    A --> C{Supabase pgvector Semantic Cache}
-    C -->|Headline Cosine Similarity >= 0.92 within 48h| D[Cross-Publisher Semantic Cache Hit]
-    D -->|42.3ms HNSW Vector Lookup| UI2[Serve Verified Existing Summary]
-    
-    C -->|Cache Miss| E[Tier 2: Gemini 1.5 Flash Generator]
-    E --> F[Deterministic Groundedness Engine]
-    F -->|Verify Numbers, Currencies, Percentages, Entities| G{Violation Detected?}
-    G -->|Yes: Flagged Metric| H[Strict Temp 0.0 Re-generation]
-    G -->|No: 100% Grounded| I[Persist to pgvector & Return]
+    A[Incoming RSS article] --> B[Tier 1: client extractive compressor]
+    B -->|no network, 0 tokens| UI1[Instant 1-sentence preview]
+
+    A --> X{Exact URL in cache, under 48h?}
+    X -->|yes| UI2[Serve cached summary]
+    X -->|no| C{pgvector: cosine >= 0.92 within 48h?}
+    C -->|yes: other outlet, same story| UI2
+    C -->|no| E[Tier 2: Gemini 1.5 Flash, 3 bullets]
+    E --> F[Deterministic groundedness check]
+    F -->|all numbers and names found in source| I[Store summary + embedding]
+    F -->|violation| H[Re-generate at temperature 0]
     H --> I
-    I --> UI3[Display Verified 3-Bullet Summary]
+    I --> UI3[3-bullet summary + source-check badge]
+    UI3 --> J[User opens full brief]
+    J --> K[Tier 3: 4-section brief, cached]
 
-    UI3 --> J[User Clicks 'View Full Brief']
-    J --> K[Tier 3: 4-Section Long-Form Intelligence Brief]
-
-    Cron[15-min Trend Clustering Cron] --> L[Cluster Headlines across >= 2 Sources]
-    L --> M[Proactively Pre-Warm Trending Summaries]
+    Cron[15-min clustering cron] --> L[Stories covered by 2+ outlets]
+    L --> M[Pre-warm summaries]
     M --> C
 ```
 
 ---
 
-## Design Decisions & Trade-Offs
+## Design decisions and trade-offs
 
-### 1. Why a Cosine Similarity Threshold of 0.92?
-We conducted an empirical threshold sweep across 60 labelled headline pairs (`evals/data/pairs.jsonl`) between 0.80 and 0.98:
+### Why a cosine threshold of 0.92?
+Two headlines are embedded as 768-dim vectors; cosine similarity is the angle between them (1.0 = same direction), independent of headline length. The threshold trades two errors:
 
-![Threshold Sweep](evals/threshold_sweep.png)
+- **False positive (merge two different stories)**: the reader gets a summary of the wrong story, e.g. "Fed cuts rates" served for "Fed holds rates". Silent, and it persists for up to 48 h.
+- **False negative (miss a duplicate)**: one extra LLM call. Costs money, but the output is correct.
 
-* **Empirical Findings:** The highest mathematical F1 score is achieved at **0.80 (82.4% F1, 100% Precision, 70% Recall)**.
-* **Why 0.92 in Production (100% Precision, 50% Recall, 66.7% F1)?**
-  In an automated news summarizer, the asymmetry of errors is critical:
-  * **False Positive (Dangerous):** Two different stories sharing an entity (e.g. *"Federal Reserve holds interest rates steady"* vs *"Federal Reserve announces 50bps rate cut"*) are merged. The user is served completely erroneous news.
-  * **False Negative (Harmless):** Two identical stories are not merged. The system simply falls back to generating a fresh summary via Gemini 1.5 Flash.
-  * Setting the threshold to **0.92** guarantees high-confidence semantic deduplication (0 false positives on our test set) while preventing cache pollution on hard negatives.
+Because false positives are much worse, 0.92 was picked as a deliberately high-precision value. **It has not been validated against the real model.** The sweep in `evals/RESULTS.md` currently runs on a simulated embedder, and even there 0.80/0.81 match 0.92's precision with higher recall. To validate, run `GOOGLE_GEMINI_API_KEY=... node evals/embed_pairs.js` once. That caches real `text-embedding-004` vectors, and the sweep re-runs offline on them. Note that production embeds headline + the first 150 body words, while the pairs set only has headlines.
 
-### 2. Why Deterministic Groundedness Instead of LLM-as-a-Judge?
-* **Latency:** Deterministic regex checks execute in **< 0.2 ms** compared to **1,200 ms – 2,500 ms** for an LLM-as-a-judge roundtrip.
-* **Cost:** Regex verification costs **$0.00 and 0 tokens**. An LLM judge would require 400+ additional tokens per article, effectively doubling summary generation costs.
-* **Consistency:** Prompt-based LLM judges are susceptible to their own hallucinations and stochastic evaluation variances. The regex pipeline strictly checks every extracted metric (`$1,599`, `€500M`, `3.5x`, `54%`) directly against the source text.
+### Why a deterministic check instead of LLM-as-judge?
+- **No extra model call**: the check is regex and string matching in-process, so it adds no tokens and no network round trip.
+- **Reproducible and auditable**: the same input always gives the same verdict, and each violation names the exact string that wasn't found.
+- **No judge hallucinations**: an LLM judge can itself be wrong, and is not repeatable.
 
-### 3. Estimated Cost per 1,000 Summaries
-Based on official Google Gemini 1.5 Flash pricing ($0.075 / 1M input tokens, $0.30 / 1M output tokens):
-* **Average Tokens per Summary (Cache Miss):**
-  * Prompt Input: ~300 tokens ($0.0000225)
-  * Output: ~120 tokens ($0.0000360)
-  * Total per article: **$0.0000585** (~0.0058 cents)
-* **Cost for 1,000 Summaries without Caching:** **~$0.059** (under 6 cents per thousand).
-* **Cost for 1,000 Summaries with RSSMindly (25% Cache Hit Rate):**
-  $$1,000 \times (1 - 0.189) \times \$0.0000585 \approx \mathbf{\$0.047}$$
-  *(~4.7 cents per 1,000 articles summarized).*
-* **Embedding Ingestion Cost:** Google `text-embedding-004` costs $0.000025 per 1,000 tokens (~$0.0005 per 1,000 headlines), a negligible fraction of operational costs.
+**The cost of this choice is coverage.** It only checks whether numbers and capitalised names appear in the source. It cannot see meaning: negation, swapped roles ("A acquired B" vs "B acquired A"), and numbers attached to the wrong metric all pass (held-out cases h04, h05, h14). It is a cheap first filter, not proof of faithfulness.
 
-### 4. Cache Invalidation & Rolling 48-Hour TTL
-The `match_summaries` stored procedure enforces a rolling `max_age_hours DEFAULT 48` condition (`WHERE created_at >= NOW() - INTERVAL '48 hours'`).
-* Fast-moving news cycles undergo updates and corrections within 24–48 hours.
-* After 48 hours, stale summaries are not matched against new developments, ensuring that subsequent follow-up stories receive fresh generation.
+### Cost per 1,000 summaries
+`evals/estimate_cost.js` measures the exact Tier 2 prompt (`buildTier2Prompt`) and estimates tokens as chars/4:
+
+| Prompt | Est. input tokens |
+|---|---|
+| Fixture average (short articles) | 143 |
+| Upper bound (500-char title + 4,000-char content cap) | 1,214 |
+
+`cost_per_1k = 1000 × (1 − hit_rate) × (in_tokens × price_in + out_tokens × price_out) / 1e6`
+
+Prices change, so none are hard-coded. Run `PRICE_IN_PER_M=… PRICE_OUT_PER_M=… OUTPUT_TOKENS=… CACHE_HIT_RATE=… node evals/estimate_cost.js` with current figures from [ai.google.dev/pricing](https://ai.google.dev/pricing). Output token counts and the real hit rate have not been measured; logging Gemini's `usageMetadata` in production would provide both.
+
+### Cache invalidation: rolling 48 h
+Both lookups (exact URL and `match_summaries`) only consider rows with `created_at >= now() − 48h`. News changes fast: corrections, follow-ups, a rate decision followed by its market reaction. A summary older than two days is more likely to be wrong than useful. After 48 h a row stops matching and the next request generates a fresh summary (and upserts over the old row for that URL). The trade-off: a story still developing on day three gets a new LLM call, even if nothing changed.
 
 ---
 
 ## Limitations
 
-1. **Headline Embedding Scope:** Semantic deduplication indexes headlines via `text-embedding-004`. If two articles share similar headlines but possess divergent investigative revelations in the later paragraphs, the system serves the cached canonical summary.
-2. **Deterministic String Matching:** The groundedness engine verifies metrics and proper nouns via string matching and normalization. While it catches fabricated numbers, currency mismatches, and entity recombinations, it does not perform deep syntactic coreference resolution for obscure pronouns.
-3. **Rolling TTL Boundary:** Articles published 49 hours apart on the same developing story will not match against the cache, resulting in a fresh summary.
-4. **Client API Key Rate Limits:** Free-tier Google AI Studio Gemini API keys enforce a limit of 15 requests per minute (RPM). Heavy concurrent ingestion across many feeds may encounter HTTP 429 status codes unless throttled.
+1. **Groundedness checker gaps**, all reproduced in the held-out set:
+   - Meaning-level errors pass: negation, swapped roles, swapped attribution (h04, h05, h14).
+   - Numbers at the end of a sentence (`2027.`) are skipped by the extractor, so a wrong year passes (h10).
+   - Substring matching lets `150` pass when the source says `1500` (h11).
+   - Currency symbols are stripped before comparison, so `$` vs `€` passes (h18).
+   - Stopwords like `Price` hide real names (h06). Spelled-out numbers ("Three" vs `3`), hedged rounding and merged titles cause false alarms (h07, h08, h15).
+2. **Threshold not validated** on real embeddings (see above).
+3. **All eval data is AI-authored**: 60 headline pairs, 50 groundedness cases, 20 replay articles. Treat every metric as indicative until a human reviews the data.
+4. **Headline-only dedup risk**: two articles with near-identical headlines but different later paragraphs share one summary.
+5. **Rate limiting is per serverless instance** and keyed on `x-forwarded-for`, which only your hosting provider (e.g. Vercel) can be trusted to set. It is a basic abuse guard, not a quota system.
+6. **Free-tier Gemini keys have rate limits**; heavy ingestion across many feeds can hit HTTP 429.
 
 ---
 
 ## Core Engineering Details
 
 ### 1. Cross-Publisher Semantic Cache (`api/lib/embedding.js`)
-* Headlines are mapped into 768-dimensional vector embeddings using Google's `text-embedding-004`.
+Instead of caching on brittle URL strings, headlines are mapped into 768-dimensional vector embeddings using Google's `text-embedding-004`.
 * Stored in Supabase PostgreSQL using `pgvector` with an **HNSW cosine index** (`vector_cosine_ops`, `m = 16`, `ef_construction = 64`).
-* A match threshold of **0.92** allows competing headlines covering the same news cycle to share summaries instantly.
-* Queries look back over a rolling 48-hour window so stale news cycles are naturally aged out.
+* A match threshold of **0.92** lets competing headlines covering the same news cycle share a summary (see trade-offs above).
+* Queries look back over a rolling 48-hour window so stale news cycles age out.
 
 ### 2. Cascading Multi-Tier Summarization (`api/summarize.js`)
-* **Tier 1 (Instant Micro-Summary — < 0.1ms, 0 tokens):** A rule-based extractive compressor scores headline salience, lead paragraphs, and sentence boundaries directly in browser memory. Renders immediately while network requests are in flight.
-* **Tier 2 (3-Bullet Fast Summary — Gemini 1.5 Flash):** Generates 3 high-density bullets (catalyst, confirmed metrics, market impact).
-* **Tier 3 (On-Demand Long-Form Intelligence Brief):** When the user clicks **`📖 View Full Brief`**, an analytical agent generates a structured 4-part dossier:
+* **Tier 1 (instant micro-summary, 0 tokens):** A rule-based extractive compressor scores headline salience, lead paragraphs, and sentence boundaries in browser memory. It renders immediately while network requests are in flight.
+* **Tier 2 (3-bullet summary, Gemini 1.5 Flash):** Generates 3 high-density bullets (catalyst, confirmed metrics, market impact).
+* **Tier 3 (on-demand long-form brief):** When the user clicks **`📖 View Full Brief`**, an analytical agent generates a structured 4-part dossier:
   1. *Executive Overview & Key Developments*
   2. *Detailed Background, Context & Key Statements*
   3. *Key Metrics & Confirmed Figures (verbatim extraction)*
   4. *Strategic Industry & Future Outlook*
-  Cached directly in `tier3_deepdive` for 0-token recall across sessions.
+  Cached in `tier3_deepdive` for 0-token recall across sessions.
 
 ### 3. Predictive Pre-Warming via Multi-Feed Clustering (`api/prewarm.js`)
 A background cron worker runs every 15 minutes:
@@ -168,23 +152,26 @@ A background cron worker runs every 15 minutes:
 * Pre-populates Tier 1 and Tier 2 summaries into pgvector before users open the app.
 * *Guardrail:* Defaults to dry-run unless `ENABLE_PREWARMING=true` is set.
 
-### 4. Deterministic Groundedness Engine (`api/lib/groundedness.js`)
-Rather than relying on vague prompt instructions like *"do not hallucinate"*, RSSMindly runs an automated verification pipeline:
-* Extracts every currency value (`$1,599`, `€500M`), multiplier (`3.5x`), percentage (`54%`), and standalone number from the generated summary using explicit Unicode escapes (`[\$\u20AC\u00A3\u00A5]`).
-* Cross-checks every extracted metric against the raw article source text.
-* Any violation triggers a zero-temperature (`temperature: 0.0`) regeneration with strict grounded constraints.
+### 4. Deterministic Groundedness Check (`api/lib/groundedness.js`)
+Rather than relying only on prompt instructions like *"do not hallucinate"*, every generated summary is checked:
+* Extracts currency values (`$1,599`, `€500 million`), multipliers (`3.5x`), percentages (`54%`), standalone numbers, and capitalised names from the summary. Currency symbols are written as `\u` escapes so the regex doesn't depend on file encoding.
+* Normalises formatting (commas, currency words) and looks each item up in the source text.
+* Any violation triggers a zero-temperature (`temperature: 0.0`) re-generation with stricter instructions.
+* Limits are listed under [Limitations](#limitations).
 
 ---
 
-## Security & Privacy
+## Privacy & BYOK (Bring Your Own Key)
 
-* **Zero Key Storage:** When using BYOK (Bring Your Own Key), `clientApiKey` is passed ephemerally in the request body, used strictly in-memory to instantiate the Gemini client, and is never persisted to Supabase or logs.
-* **Sanitized Logging:** All backend error handlers filter and redact any occurrences of `clientApiKey`.
-* **Input Validation & Limits:** `api/summarize.js` enforces strict payload limits:
-  * URL length: $\le 2,048$ characters.
-  * Title length: $\le 500$ characters.
-  * Content length: $\le 50,000$ characters.
-* **Rate Limiting:** Enforces an in-memory sliding-window rate limit (60 requests per minute per IP) to prevent backend abuse.
+RSSMindly is designed to be free and open:
+
+* **Free Tier (BYOK):** Users input their free Google Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+* **Zero Telemetry:** Keys are stored in `localStorage` in the user's browser. If the backend server is unreachable, the client falls back to direct browser-to-Gemini requests.
+* **Pro Mode:** Server-side environment variables (`GOOGLE_GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`) allow centralized managed hosting for teams.
+
+### Server-side handling (`api/summarize.js`)
+* A `clientApiKey` sent in the request body is used only in memory to create the Gemini client. It is not written to Supabase, and every log/error path passes through `redactSecrets()` (client key and server keys).
+* Request guards: string-type checks on all fields; URL ≤ 2,048 chars, title ≤ 500, content ≤ 50,000 (HTTP 413 above that); 60 requests/minute per IP (HTTP 429). Covered by `test/api.test.js`.
 
 ---
 
@@ -226,7 +213,7 @@ CREATE TABLE IF NOT EXISTS summaries (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 3. HNSW cosine index for sub-50ms vector searches
+-- 3. HNSW cosine index for fast vector searches
 CREATE INDEX IF NOT EXISTS idx_summaries_embedding_hnsw 
 ON summaries USING hnsw (headline_embedding vector_cosine_ops)
 WITH (m = 16, ef_construction = 64);
@@ -275,24 +262,35 @@ cd rssmindly
 npm install
 ```
 
-### 2. Run Automated Test Suite (36/36 Unit Tests + 15/15 Architecture Tests)
+### 2. Run Automated Tests (0 tokens spent)
 ```bash
 npm test
 ```
-Tests vector cosine math, floating-point guards, date resiliency, groundedness regex filters, and trend clustering in pure memory (0 tokens spent).
+Runs `test/unit.test.js` (36 checks: cosine edge cases, clustering with bad dates, number/currency extraction), `test/api.test.js` (15 checks: type checks, size limits, rate limiting, redaction) and `scripts/test-semantic-pipeline.js` (15 checks).
 
-### 3. Run Offline Evaluation Harness
+### 3. Run the Offline Evaluation Harness
 ```bash
 npm run eval
 ```
-Executes the threshold sweep across 60 headline pairs, runs the 30-case groundedness benchmark, and replays the 20-article feed fixture to evaluate cache latency and token efficiency without requiring live API keys. Results are written to [`evals/RESULTS.md`](evals/RESULTS.md).
+Threshold sweep, groundedness (dev + held-out, baseline vs current), feed replay, and token estimate. No keys or network needed. Writes [`evals/RESULTS.md`](evals/RESULTS.md) and exits non-zero if a regression floor is breached (CI runs this).
 
-### 4. Run Linter
+Optional, one-off with a key, to replace the simulated embedder with real vectors:
 ```bash
-npm run lint
+GOOGLE_GEMINI_API_KEY=... node evals/embed_pairs.js
 ```
 
-### 5. Build for Production
+### 4. Run Live Multi-Feed Benchmark
+```bash
+node scripts/run-live-feed-test.js
+```
+Fetches real articles from BBC Tech, TechCrunch, and Hacker News and outputs latency, clustering, and deduplication statistics.
+
+### 5. Start Development Server
+```bash
+npm run dev
+```
+
+### 6. Build for Production
 ```bash
 npm run build
 ```
@@ -302,7 +300,7 @@ npm run build
 ## Documentation & Guides
 
 * 📖 **[User Manual & Complete Guide](docs/USER_MANUAL.md):** In-depth user manual covering feed addition, folder bundles, daily AI digest generation, reader mode (`smry.ai`), and mobile PWA installation.
-* 📊 **[Evaluation Benchmark Report](evals/RESULTS.md):** Complete offline evaluation results with threshold sweep tables and latency breakdowns.
+* 📊 **[Evaluation Results](evals/RESULTS.md):** Full eval output, including every false positive and false negative.
 * 💡 **In-App Tutorial:** Click the **User Guide** button directly in the app header or sidebar to open the interactive walkthrough.
 
 ---
