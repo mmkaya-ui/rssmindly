@@ -1,70 +1,22 @@
 {
   "total": 30,
-  "tp": 14,
-  "tn": 11,
-  "fp": 3,
-  "fn": 2,
-  "accuracy": 83.3,
-  "precision": 82.4,
-  "recall": 87.5,
-  "f1": 84.9,
-  "falsePositives": [
-    {
-      "caseId": "g07",
-      "summary": "<ul><li>Microsoft and BlackRock created a $30 billion fund for AI infrastructure.</li><li>Capital will be deployed to develop data centers and energy facilities.</li></ul>",
-      "violations": [
-        {
-          "type": "entity",
-          "value": "Capital",
-          "reason": "Entity \"Capital\" is not mentioned in source article"
-        }
-      ],
-      "notes": "Correct investment figure $30 billion and named sponsors"
-    },
-    {
-      "caseId": "g26",
-      "summary": "<ul><li>Clean generation from wind and solar achieved 42% of total European electricity output.</li></ul>",
-      "violations": [
-        {
-          "type": "entity",
-          "value": "Clean",
-          "reason": "Entity \"Clean\" is not mentioned in source article"
-        }
-      ],
-      "notes": "Percentage representation: source has \"42 percent\" while summary has \"42%\""
-    },
-    {
-      "caseId": "g27",
-      "summary": "<ul><li>The platform was ordered to pay €500 million in regulatory penalties.</li></ul>",
-      "violations": [
-        {
-          "type": "currency",
-          "value": "€500 million",
-          "reason": "Metric \"€500 million\" appears in summary but is not present in original article"
-        }
-      ],
-      "notes": "Currency symbol: source has \"500 million euros\", summary has \"€500 million\""
-    }
-  ],
-  "falseNegatives": [
-    {
-      "caseId": "g28",
-      "summary": "<ul><li>Transit authority received authorization to construct 8 new commuter rail routes.</li></ul>",
-      "notes": "Single digit hallucination: source has \"2\", summary invents \"8\""
-    },
-    {
-      "caseId": "g29",
-      "summary": "<ul><li>The board formally appointed John Smith as the new executive vice president.</li></ul>",
-      "notes": "Entity recombination: \"John\" from John Higgins + \"Smith\" from Michael Smith = fake entity \"John Smith\""
-    }
-  ],
+  "tp": 16,
+  "tn": 14,
+  "fp": 0,
+  "fn": 0,
+  "accuracy": 100,
+  "precision": 100,
+  "recall": 100,
+  "f1": 100,
+  "falsePositives": [],
+  "falseNegatives": [],
   "results": [
     {
       "id": "g01",
       "category": "clean_grounded",
       "expected": "GROUNDED",
       "predicted": "GROUNDED",
-      "score": 0.86,
+      "score": 0.88,
       "violationsCount": 1,
       "outcome": "TN (Correctly passed grounded)"
     },
@@ -100,8 +52,8 @@
       "category": "clean_grounded",
       "expected": "GROUNDED",
       "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
+      "score": 0.8,
+      "violationsCount": 1,
       "outcome": "TN (Correctly passed grounded)"
     },
     {
@@ -117,10 +69,10 @@
       "id": "g07",
       "category": "clean_grounded",
       "expected": "GROUNDED",
-      "predicted": "HALLUCINATED",
-      "score": 0.75,
-      "violationsCount": 1,
-      "outcome": "FP (False alarm on grounded text)"
+      "predicted": "GROUNDED",
+      "score": 1,
+      "violationsCount": 0,
+      "outcome": "TN (Correctly passed grounded)"
     },
     {
       "id": "g08",
@@ -172,8 +124,8 @@
       "category": "injected_wrong_number",
       "expected": "HALLUCINATED",
       "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
+      "score": 0.33,
+      "violationsCount": 2,
       "outcome": "TP (Correctly caught hallucination)"
     },
     {
@@ -288,37 +240,37 @@
       "id": "g26",
       "category": "formatting_edge_case",
       "expected": "GROUNDED",
-      "predicted": "HALLUCINATED",
-      "score": 0.67,
-      "violationsCount": 1,
-      "outcome": "FP (False alarm on grounded text)"
+      "predicted": "GROUNDED",
+      "score": 1,
+      "violationsCount": 0,
+      "outcome": "TN (Correctly passed grounded)"
     },
     {
       "id": "g27",
       "category": "formatting_edge_case",
       "expected": "GROUNDED",
-      "predicted": "HALLUCINATED",
-      "score": 0,
-      "violationsCount": 1,
-      "outcome": "FP (False alarm on grounded text)"
+      "predicted": "GROUNDED",
+      "score": 1,
+      "violationsCount": 0,
+      "outcome": "TN (Correctly passed grounded)"
     },
     {
       "id": "g28",
       "category": "single_digit_hallucination",
       "expected": "HALLUCINATED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "FN (Missed hallucination)"
+      "predicted": "HALLUCINATED",
+      "score": 0.5,
+      "violationsCount": 1,
+      "outcome": "TP (Correctly caught hallucination)"
     },
     {
       "id": "g29",
       "category": "split_name_coincidence",
       "expected": "HALLUCINATED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "FN (Missed hallucination)"
+      "predicted": "HALLUCINATED",
+      "score": 0,
+      "violationsCount": 1,
+      "outcome": "TP (Correctly caught hallucination)"
     },
     {
       "id": "g30",

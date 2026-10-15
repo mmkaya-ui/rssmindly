@@ -106,7 +106,6 @@ export async function runReplayEval() {
     // --------------------------------------------------------------------------
     // STEP 2: Semantic Cache Lookup via Embedding
     // --------------------------------------------------------------------------
-    const embStart = performance.now();
     const embedding = embedHeadline(art.title);
     const semanticMatches = await db.matchSummaries(embedding, 0.92, 48);
 

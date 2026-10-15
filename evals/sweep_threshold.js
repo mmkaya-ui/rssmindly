@@ -117,7 +117,7 @@ export function runThresholdSweep() {
   };
 }
 
-function renderChartPng(results, bestT) {
+function renderChartPng(results, _bestT) {
   const width = 720;
   const height = 400;
   const canvas = new SimpleCanvas(width, height, [248, 250, 252, 255]); // slate-50 background

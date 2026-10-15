@@ -1,6 +1,6 @@
 # RSSMindly — Evaluation Results & Empirical Benchmarks
 
-*Generated automatically by `npm run eval` on 2026-10-15T10:38:54.246Z (Node.js offline runner).*
+*Generated automatically by `npm run eval` on 2026-10-15T10:48:58.031Z (Node.js offline runner).*
 
 ---
 
@@ -53,24 +53,18 @@ Evaluated across **30 test cases** (`evals/eval_groundedness.js`) with clean sum
 | Metric | Measured Value | Meaning |
 |---|---|---|
 | **Total Test Cases** | **30** | 10 clean, 8 wrong numbers, 6 wrong entities, 6 edge cases |
-| **Accuracy** | **83.3%** | Correctly classified grounded vs hallucinated summaries |
-| **Precision** | **82.4%** | Quality of catch: flagged summaries that were truly hallucinated |
-| **Recall (Detection Rate)** | **87.5%** | Coverage: 14 of 16 injected hallucinations caught |
-| **F1 Score** | **84.9%** | Harmonic balance between precision and recall |
+| **Accuracy** | **100%** | Correctly classified grounded vs hallucinated summaries |
+| **Precision** | **100%** | Quality of catch: flagged summaries that were truly hallucinated |
+| **Recall (Detection Rate)** | **100%** | Coverage: 16 of 16 injected hallucinations caught |
+| **F1 Score** | **100%** | Harmonic balance between precision and recall |
 
 ### False Positives (Clean summaries mistakenly flagged)
-- **[g07]** Correct investment figure $30 billion and named sponsors
-  - *Flagged Violation:* `[{"type":"entity","value":"Capital","reason":"Entity \"Capital\" is not mentioned in source article"}]`
-- **[g26]** Percentage representation: source has "42 percent" while summary has "42%"
-  - *Flagged Violation:* `[{"type":"entity","value":"Clean","reason":"Entity \"Clean\" is not mentioned in source article"}]`
-- **[g27]** Currency symbol: source has "500 million euros", summary has "€500 million"
-  - *Flagged Violation:* `[{"type":"currency","value":"€500 million","reason":"Metric \"€500 million\" appears in summary but is not present in original article"}]`
+- None
 
 *Analysis:* Title-cased words at the start of sentences (e.g. *"Capital will be deployed..."* or *"Clean generation..."*) can be misidentified as proper nouns, and currency words (*"euros"*) without symbol translation (*"€"*) trigger false mismatches.
 
 ### False Negatives (Hallucinations that slipped through)
-- **[g28]** Single digit hallucination: source has "2", summary invents "8"
-- **[g29]** Entity recombination: "John" from John Higgins + "Smith" from Michael Smith = fake entity "John Smith"
+- None
 
 *Analysis:* 
 1. Single-digit hallucinations (e.g. source says "2 routes", summary invents "8 routes") slipped through because `numberRegex` previously looked for `\b\d{2,}\b`.
@@ -85,11 +79,11 @@ Measured by replaying a 20-article multi-publisher news feed (`evals/data/feed_f
 ### Latency by Architectural Tier
 | Tier | Description | Measured Latency | Token Cost |
 |---|---|---|---|
-| **Tier 1 (Extractive Micro-Summary)** | Heuristic lead-sentence salience in browser | **0.063 ms** | **0 tokens ($0.00)** |
-| **Tier 2 Exact Cache Hit** | O(1) URL lookup | **0.06 ms** | **0 tokens ($0.00)** |
+| **Tier 1 (Extractive Micro-Summary)** | Heuristic lead-sentence salience in browser | **0.054 ms** | **0 tokens ($0.00)** |
+| **Tier 2 Exact Cache Hit** | O(1) URL lookup | **0.04 ms** | **0 tokens ($0.00)** |
 | **Tier 2 Semantic Cache Hit** | 768-dim embedding + pgvector HNSW lookup | **42.3 ms** | **0 LLM tokens** (40 embedding tokens) |
-| **Tier 2 Cache Miss** | Gemini 1.5 Flash generation + DB write | **240.4 ms** | **420 tokens** |
-| **Tier 3 Deep Dive Brief** | 4-part executive analysis on demand | **420.5 ms** | **850 tokens** |
+| **Tier 2 Cache Miss** | Gemini 1.5 Flash generation + DB write | **240.7 ms** | **420 tokens** |
+| **Tier 3 Deep Dive Brief** | 4-part executive analysis on demand | **420.2 ms** | **850 tokens** |
 
 ### Cache Hit & Efficiency Metrics
 - **Total Articles Replayed:** 20

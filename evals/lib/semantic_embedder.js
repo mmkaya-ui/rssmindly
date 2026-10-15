@@ -6,8 +6,6 @@
 // - Event / predicate subspace (decisive delta distinguishing same event vs conflicting event)
 // ==============================================================================
 
-import { cosineSimilarity } from '../../api/lib/embedding.js';
-
 const DIMENSIONS = 768;
 
 function pseudoRandom(seedStr) {
@@ -70,7 +68,7 @@ const RULES = [
   { match: /(fda.*epinephrine|neffy|needle.*free|needleless.*mist)/i, concept: 'ent_neffy_epipen', weight: 3.0 },
 
   // 3. Specific Story Events (Drives cosine similarity >= 0.92 for true duplicates)
-  { match: /(m5.*lineup|m5.*1\,599|m5.*laptop|m5.*silicon)/i, concept: 'evt_apple_m5_launch', weight: 3.8 },
+  { match: /(m5.*lineup|m5.*1,599|m5.*laptop|m5.*silicon)/i, concept: 'evt_apple_m5_launch', weight: 3.8 },
   { match: /(cut.*50|half\s+a\s+point|easing.*50|drop.*50\s+bps)/i, concept: 'evt_fed_50bps_cut', weight: 3.8 },
   { match: /(catch.*booster|chopstick.*arms|mid-air\s+recovery|catches.*super\s+heavy)/i, concept: 'evt_starship_booster_catch', weight: 3.8 },
   { match: /(searchgpt.*chatgpt|chatgpt.*web\s+search|live\s+web\s+indexing)/i, concept: 'evt_chatgpt_web_search', weight: 3.8 },
@@ -114,7 +112,7 @@ const RULES = [
   { match: /(nobel\s+prize.*chemistry|protein\s+design)/i, concept: 'dom_science_nobel', weight: 4.5 },
   { match: /(deepseek.*reasoning|rival.*o1)/i, concept: 'dom_ai_deepseek', weight: 4.5 },
   { match: /(formula\s+1|f1.*madrid|racing)/i, concept: 'dom_sports_racing', weight: 4.5 },
-  { match: /(bitcoin.*90\,000|crypto.*rally)/i, concept: 'dom_crypto_btc', weight: 4.5 },
+  { match: /(bitcoin.*90,000|crypto.*rally)/i, concept: 'dom_crypto_btc', weight: 4.5 },
   { match: /(dinosaur|patagonia|fossil)/i, concept: 'dom_paleontology', weight: 4.5 },
   { match: /(olympic\s+games|paris.*seine)/i, concept: 'dom_olympics', weight: 4.5 },
   { match: /(avatar|james\s+cameron|sequels)/i, concept: 'dom_cinema_avatar', weight: 4.5 },
