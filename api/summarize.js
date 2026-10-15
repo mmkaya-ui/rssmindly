@@ -11,6 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getFingerprintText, generateHeadlineEmbedding } from './lib/embedding.js';
 import { evaluateGroundedness } from './lib/groundedness.js';
 import { generateExtractiveMicroSummary } from './lib/extractive.js';
+import { generateWithFallback, addUsage, EMPTY_USAGE } from './lib/models.js';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -276,28 +277,22 @@ export default async function handler(req, res) {
       });
     }
 
-    const flashModel = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: { temperature: 0.2 }
-    });
-
     const tier2Prompt = buildTier2Prompt({ title, source, content });
 
-    let tier2Result = await flashModel.generateContent(tier2Prompt);
-    let summaryHtml = tier2Result.response.text().replace(/```html|```/g, '').trim();
+    const tier2Result = await generateWithFallback(genAI, tier2Prompt, { temperature: 0.2 });
+    let summaryHtml = tier2Result.text;
+    let usage = addUsage(EMPTY_USAGE, tier2Result.usage);
+    const modelsUsed = [tier2Result.model];
+    let regenerated = false;
 
     // --------------------------------------------------------------------------
     // STEP 4: DETERMINISTIC GROUNDEDNESS CHECK & STRICT RE-GENERATION
     // --------------------------------------------------------------------------
     let groundedness = evaluateGroundedness(summaryHtml, content, title);
+    const initialGroundedness = groundedness;
 
     // If ungrounded (number violations or score < 0.80), trigger strict regeneration with temperature 0.0
     if (!groundedness.isGrounded) {
-      const strictModel = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-        generationConfig: { temperature: 0.0 }
-      });
-
       const strictPrompt = `ZERO HALLUCINATION RE-GENERATION:
 The previous summary contained ungrounded or unverified metrics/entities:
 ${groundedness.violations.map(v => `- ${v.reason}`).join('\n')}
@@ -310,8 +305,11 @@ Title: ${title}
 Content:
 ${content.slice(0, 4000)}`;
 
-      const strictResult = await strictModel.generateContent(strictPrompt);
-      const regeneratedHtml = strictResult.response.text().replace(/```html|```/g, '').trim();
+      const strictResult = await generateWithFallback(genAI, strictPrompt, { temperature: 0.0 });
+      usage = addUsage(usage, strictResult.usage);
+      modelsUsed.push(strictResult.model);
+      regenerated = true;
+      const regeneratedHtml = strictResult.text;
 
       const recheckedGroundedness = evaluateGroundedness(regeneratedHtml, content, title);
       if (recheckedGroundedness.numberViolationsCount === 0 || recheckedGroundedness.score > groundedness.score) {
@@ -326,11 +324,6 @@ ${content.slice(0, 4000)}`;
     let tier3DeepDive = null;
     if (isLongMode) {
       try {
-        const deepModel = genAI.getGenerativeModel({
-          model: 'gemini-1.5-flash',
-          generationConfig: { temperature: 0.25 }
-        });
-
         const deepPrompt = `You are an elite, comprehensive investigative intelligence analyst.
 Provide an extensive, long-form detailed intelligence summary of this news story.
 Structure with four clean HTML sections using <h4>, <p>, and <ul>:
@@ -349,8 +342,10 @@ Source: ${source}
 Content:
 ${content.slice(0, 5000)}`;
 
-        const deepResult = await deepModel.generateContent(deepPrompt);
-        tier3DeepDive = deepResult.response.text().replace(/```html|```/g, '').trim();
+        const deepResult = await generateWithFallback(genAI, deepPrompt, { temperature: 0.25 });
+        tier3DeepDive = deepResult.text;
+        usage = addUsage(usage, deepResult.usage);
+        modelsUsed.push(deepResult.model);
       } catch (deepErr) {
         console.warn('Long summary generation failed:', redactSecrets(deepErr.message, secrets));
       }
@@ -398,6 +393,10 @@ ${content.slice(0, 5000)}`;
       groundednessScore: groundedness.score,
       groundednessReport: groundedness,
       isGrounded: groundedness.isGrounded,
+      regenerated,
+      initialGroundednessScore: initialGroundedness.score,
+      models: modelsUsed,
+      usage,
       latencyMs: Date.now() - startTime
     });
 

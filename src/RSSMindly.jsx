@@ -13,7 +13,8 @@ import { generateExtractiveMicroSummary } from './lib/extractive.js';
 // 1. CONFIGURATION & CONSTANTS
 // ==========================================
 
-const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
+// Keep in sync with api/lib/models.js. gemini-2.5-flash-preview-09-2025 was retired (HTTP 404).
+const GEMINI_MODELS = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
 // Local Model for "Pro" WebLLM features (optional usage)
 const SELECTED_LOCAL_MODEL = "Gemma-2b-it-q4f32_1"; 
 
@@ -199,25 +200,32 @@ const sanitizeHtml = (html) => {
 
 async function callGemini(prompt, apiKey, jsonMode = false) {
   if (!apiKey) return null;
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: jsonMode ? { responseMimeType: "application/json" } : undefined
-        }),
+  for (const model of GEMINI_MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: 'POST',
+          // Key in a header, not the URL, so it never lands in history or proxy logs
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: jsonMode ? { responseMimeType: "application/json" } : undefined
+          }),
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
       }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  } catch (err) {
-    console.error('Gemini request failed', err);
-    return null;
+      // Model retired / overloaded / rate-limited: try the next one. Anything else (bad key): stop.
+      if (![404, 429, 500, 503].includes(res.status)) return null;
+    } catch (err) {
+      console.error('Gemini request failed', err);
+      return null;
+    }
   }
+  return null;
 }
 
 // ==========================================
@@ -1549,7 +1557,7 @@ export default function RSSMindlyApp() {
               <div className="space-y-2 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
                 <div className="font-semibold text-gray-900 dark:text-white">How it operates:</div>
                 <ul className="list-disc pl-4 space-y-1 text-gray-600 dark:text-gray-300">
-                  <li>Headlines are embedded as 768-dimensional vectors using Google's <code className="bg-gray-200 dark:bg-slate-800 px-1 rounded">text-embedding-004</code>.</li>
+                  <li>Headlines are embedded as 768-dimensional vectors using Google's <code className="bg-gray-200 dark:bg-slate-800 px-1 rounded">gemini-embedding-001</code>.</li>
                   <li>Stored in a Supabase <b>pgvector HNSW index</b> with a &gt;0.92 cosine similarity threshold.</li>
                   <li>Competing wire stories load in <b>45ms at 0 token cost ($0.00)</b> with verified deterministic source figures.</li>
                   <li>Click the <b>⚡ Pre-Warm</b> button anytime to proactively cluster and cache viral multi-feed stories.</li>

@@ -1,6 +1,6 @@
 // ==============================================================================
 // RSSMindly — Deterministic 768-Dimensional Semantic Embedder for Offline Evals
-// Accurately models dense embedding geometry (Gemini text-embedding-004) with:
+// Accurately models dense embedding geometry (a stand-in for a real embedding model) with:
 // - Domain subspace (base similarity for shared fields: tech, finance, science)
 // - Entity subspace (strong similarity for same company/subject)
 // - Event / predicate subspace (decisive delta distinguishing same event vs conflicting event)

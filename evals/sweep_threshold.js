@@ -14,7 +14,7 @@ const PAIR_EMBEDDINGS_PATH = path.resolve('evals/data/pair_embeddings.json');
 const PRODUCTION_THRESHOLD = 0.92;
 
 /**
- * Picks the embedder. Real cached text-embedding-004 vectors are used when
+ * Picks the embedder. Real cached production-model vectors are used when
  * evals/data/pair_embeddings.json exists (created by evals/embed_pairs.js).
  * Otherwise falls back to the hand-written rule embedder, which was authored
  * while looking at this same dataset and is NOT evidence about the real model.
@@ -34,7 +34,7 @@ function loadEmbedder(pairs) {
   }
   return {
     kind: 'simulated',
-    label: 'SIMULATED rule-based embedder (evals/lib/semantic_embedder.js) — tuned on this dataset, not representative of text-embedding-004',
+    label: 'SIMULATED rule-based embedder (evals/lib/semantic_embedder.js) — tuned on this dataset, not representative of the production embedding model',
     embed: embedHeadline
   };
 }

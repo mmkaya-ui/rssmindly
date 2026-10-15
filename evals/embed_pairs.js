@@ -1,6 +1,6 @@
 // ==============================================================================
 // RSSMindly — One-off: embed every headline in evals/data/pairs.jsonl with the
-// real production model (Gemini text-embedding-004) and cache the vectors to
+// production embedding model (EMBEDDING_MODEL in api/lib/models.js) and cache the vectors to
 // evals/data/pair_embeddings.json.
 //
 // This is the ONLY eval step that needs network + a key. Once the fixture is
@@ -16,8 +16,9 @@
 import fs from 'fs';
 import path from 'path';
 import { generateHeadlineEmbedding } from '../api/lib/embedding.js';
+import { EMBEDDING_MODEL } from '../api/lib/models.js';
 
-const MODEL = 'text-embedding-004';
+const MODEL = EMBEDDING_MODEL;
 const PAIRS_PATH = path.resolve('evals/data/pairs.jsonl');
 export const PAIR_EMBEDDINGS_PATH = path.resolve('evals/data/pair_embeddings.json');
 

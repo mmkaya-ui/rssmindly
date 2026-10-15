@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { EMBEDDING_MODEL, EMBEDDING_DIMENSIONS } from './models.js';
 
 /**
  * Prepares the fingerprint text: headline + first 150 words of body content
@@ -16,7 +17,9 @@ export function getFingerprintText(title, content) {
 }
 
 /**
- * Generates a 768-dimensional semantic embedding vector using Gemini text-embedding-004
+ * Generates a 768-dimensional semantic embedding vector.
+ * Model: EMBEDDING_MODEL (default gemini-embedding-001; text-embedding-004 was retired),
+ * truncated to EMBEDDING_DIMENSIONS so it fits the VECTOR(768) column.
  */
 export async function generateHeadlineEmbedding(text, apiKey) {
   if (!apiKey) {
@@ -24,11 +27,14 @@ export async function generateHeadlineEmbedding(text, apiKey) {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+  const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
 
   // Limit input to first 1000 characters for speed and focus
   const truncatedText = text.slice(0, 1000);
-  const result = await model.embedContent(truncatedText);
+  const result = await model.embedContent({
+    content: { role: 'user', parts: [{ text: truncatedText }] },
+    outputDimensionality: EMBEDDING_DIMENSIONS
+  });
 
   if (!result || !result.embedding || !result.embedding.values) {
     throw new Error('Failed to generate embedding vector from Gemini');

@@ -60,9 +60,9 @@ export async function runAllEvals() {
 
   const embedderWarning = sweep.embedderKind === 'simulated'
     ? `> [!WARNING]
-> **The similarities in this section come from a simulated embedder** (\`evals/lib/semantic_embedder.js\`): hand-written regex rules authored while looking at this same dataset. They say nothing about how \`text-embedding-004\` scores these pairs. To get real numbers, run \`GOOGLE_GEMINI_API_KEY=... node evals/embed_pairs.js\` once and commit \`evals/data/pair_embeddings.json\`; the sweep then uses those cached vectors offline.`
+> **The similarities in this section come from a simulated embedder** (\`evals/lib/semantic_embedder.js\`): hand-written regex rules authored while looking at this same dataset. They say nothing about how the production embedding model scores these pairs. To get real numbers, run \`GOOGLE_GEMINI_API_KEY=... node evals/embed_pairs.js\` once and commit \`evals/data/pair_embeddings.json\`; the sweep then uses those cached vectors offline.`
     : `> [!NOTE]
-> Similarities use cached \`text-embedding-004\` vectors (\`evals/data/pair_embeddings.json\`). Production embeds headline + first 150 body words; this set has headlines only.`;
+> Similarities use cached production-model vectors (\`evals/data/pair_embeddings.json\`). Production embeds headline + first 150 body words; this set has headlines only.`;
 
   const md = `# RSSMindly — Evaluation Results
 

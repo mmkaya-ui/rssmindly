@@ -10,6 +10,7 @@ import { clusterTrendingStories } from './lib/clustering.js';
 import { getFingerprintText, generateHeadlineEmbedding } from './lib/embedding.js';
 import { evaluateGroundedness } from './lib/groundedness.js';
 import { generateExtractiveMicroSummary } from './lib/extractive.js';
+import { generateWithFallback } from './lib/models.js';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -162,18 +163,13 @@ export default async function handler(req, res) {
       // Generate Tier 1 & Tier 2 for pre-warming
       const tier1Micro = generateExtractiveMicroSummary(lead.title, lead.description);
 
-      const flashModel = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-        generationConfig: { temperature: 0.2 }
-      });
-
       const prompt = `Summarize this trending story into 2-3 concise, fact-checked bullet points.
 Output HTML with <ul> and <li> tags only.
 Title: ${lead.title}
 Content: ${lead.description.slice(0, 3000)}`;
 
-      const result = await flashModel.generateContent(prompt);
-      let summaryHtml = result.response.text().replace(/```html|```/g, '').trim();
+      const result = await generateWithFallback(genAI, prompt, { temperature: 0.2 });
+      let summaryHtml = result.text;
 
       // Deterministic Groundedness Check
       const groundedness = evaluateGroundedness(summaryHtml, lead.description, lead.title);
