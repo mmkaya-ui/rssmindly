@@ -1,7 +1,10 @@
 // ==============================================================================
-// RSSMindly — Pairs Dataset Builder (60 Headline Pairs)
+// RSSMindly - Pairs Dataset Builder (60 Headline Pairs)
 // Contains 30 duplicate pairs (positives) and 30 non-duplicate pairs (negatives).
-// Includes real wire headlines & synthetically authored challenging pairs.
+// PROVENANCE: every headline below was written by an AI assistant, so every pair is
+// emitted with synthetic: true. based_on_real_event marks pairs that paraphrase a real
+// news event; their wording is NOT copied from a published headline and has no source URL.
+// Review before trusting any metric computed on this set.
 // ==============================================================================
 
 import fs from 'fs';
@@ -19,8 +22,8 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'tech',
-    synthetic: false,
-    notes: 'Real-world Reuters vs CNBC coverage of same product event'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Reuters vs CNBC coverage of same product event'
   },
   {
     id: 'p02',
@@ -29,8 +32,8 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'finance',
-    synthetic: false,
-    notes: 'Real-world AP vs Bloomberg coverage of FOMC rate decision'
+    based_on_real_event: true,
+    notes: 'Based on a real event: AP vs Bloomberg coverage of FOMC rate decision'
   },
   {
     id: 'p03',
@@ -39,7 +42,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'tech',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'TechCrunch vs The Verge coverage of OpenAI search release'
   },
   {
@@ -49,7 +52,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'science',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Ars Technica vs Space.com coverage of Flight 5'
   },
   {
@@ -59,7 +62,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'finance',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'WSJ vs Financial Times on Tesla Q3 earnings release'
   },
   {
@@ -69,7 +72,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'tech',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Reuters vs Washington Post on DOJ adtech trial'
   },
   {
@@ -79,7 +82,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'finance',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'CNBC vs Forbes on market capitalization ranking'
   },
   {
@@ -89,7 +92,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'tech',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'BBC News vs Politico EU on European regulatory fine'
   },
   {
@@ -99,7 +102,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'tech',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'VentureBeat vs The Verge on Anthropic computer-use agent release'
   },
   {
@@ -109,7 +112,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'business',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Seattle Times vs AP on IAM union contract ratification'
   },
   {
@@ -119,7 +122,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'finance',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Bloomberg vs Reuters on GAIIP data center fund'
   },
   {
@@ -129,7 +132,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'finance',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Nikkei Asia vs Reuters on BOJ rate pause'
   },
   {
@@ -139,7 +142,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'tech',
     category: 'tech',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Taiwan News vs Bloomberg on TSMC earnings beat'
   },
   {
@@ -149,7 +152,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'tech',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'CNBC vs MarketWatch on Amazon Q3 financial report'
   },
   {
@@ -159,7 +162,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'easy_positive',
     category: 'science',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'CNN Health vs STAT News on FDA clearance of ARS Pharma Neffy'
   },
 
@@ -171,7 +174,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Idiomatic entity phrasing ("Cupertino tech giant") vs standard brand headline'
   },
   {
@@ -181,7 +184,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'finance',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Named Chairman vs organizational entity with technical abbreviation'
   },
   {
@@ -191,7 +194,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'science',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Geographic facility focus ("Boca Chica launch pad") vs company branding'
   },
   {
@@ -201,7 +204,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Formal legal jargon ("forced divestiture") vs colloquial "breakup"'
   },
   {
@@ -211,7 +214,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'finance',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: "Austin EV maker" periphrasis with metric focus'
   },
   {
@@ -221,7 +224,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Currency conversion ($840M vs 798M euros) and generic entity substitution'
   },
   {
@@ -231,7 +234,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'finance',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: CEO naming ("Jensen Huang graphics powerhouse") and colorful rhetoric'
   },
   {
@@ -241,7 +244,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'business',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Specific union local code ("district 751") and vote percentage'
   },
   {
@@ -251,7 +254,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Industry classification ("World premier foundry") without direct brand name'
   },
   {
@@ -261,7 +264,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'science',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Patient perspective terminology ("needleless adrenaline mist")'
   },
   {
@@ -271,7 +274,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Descriptive mechanics ("keyboard cursor and mouse") without model version tag'
   },
   {
@@ -281,7 +284,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Corporate location periphrasis ("Seattle retail giant")'
   },
   {
@@ -291,7 +294,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Technical terminology ("direct live web indexing")'
   },
   {
@@ -301,7 +304,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'finance',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Governor name and colloquial metaphor ("tightening monetary screws")'
   },
   {
@@ -311,7 +314,7 @@ export const PAIRS = [
     is_duplicate: true,
     difficulty: 'hard_positive',
     category: 'finance',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic: Strategic financial terminology ("private capital syndicate", "war chest")'
   },
 
@@ -326,7 +329,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic Hard Negative: Same entities (Apple, M5), but opposite event (launch vs delay)'
   },
   {
@@ -336,7 +339,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'finance',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic Hard Negative: Same institution & meeting topic, but opposite policy action (cut vs hold)'
   },
   {
@@ -346,7 +349,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'finance',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic Hard Negative: Same company & quarter, opposite business metric (profit surge vs delivery drop)'
   },
   {
@@ -356,8 +359,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'science',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Flight 5 success vs Flight 3 destruction'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Flight 5 success vs Flight 3 destruction'
   },
   {
     id: 'n05',
@@ -366,7 +369,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic Hard Negative: Same company & product family (ChatGPT), totally different feature & event'
   },
   {
@@ -376,8 +379,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'tech',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: US DOJ adtech prosecution vs EU General Court appeal victory'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: US DOJ adtech prosecution vs EU General Court appeal victory'
   },
   {
     id: 'n07',
@@ -386,8 +389,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'finance',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Valuation peak milestone vs historic one-day market rout'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Valuation peak milestone vs historic one-day market rout'
   },
   {
     id: 'n08',
@@ -396,8 +399,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'business',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Final contract ratification vs earlier contract rejection'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Final contract ratification vs earlier contract rejection'
   },
   {
     id: 'n09',
@@ -406,8 +409,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'tech',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Same company (Meta), regulatory penalty vs open-source AI release'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Same company (Meta), regulatory penalty vs open-source AI release'
   },
   {
     id: 'n10',
@@ -416,8 +419,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'tech',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: TSMC earnings performance vs TSMC geopolitical export controls'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: TSMC earnings performance vs TSMC geopolitical export controls'
   },
   {
     id: 'n11',
@@ -426,8 +429,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'business',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Same company (Microsoft), multi-billion AI fund vs gaming layoffs'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Same company (Microsoft), multi-billion AI fund vs gaming layoffs'
   },
   {
     id: 'n12',
@@ -436,7 +439,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'science',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic Hard Negative: Same medical product & regulator, opposite outcome (approval vs rejection letter)'
   },
   {
@@ -446,8 +449,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'tech',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Same AI company, product feature launch vs copyright litigation'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Same AI company, product feature launch vs copyright litigation'
   },
   {
     id: 'n14',
@@ -456,8 +459,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'finance',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Same rate figure (0.25%), rate hike event (July) vs rate hold event (Oct)'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Same rate figure (0.25%), rate hike event (July) vs rate hold event (Oct)'
   },
   {
     id: 'n15',
@@ -466,8 +469,8 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'business',
-    synthetic: false,
-    notes: 'Real-world Hard Negative: Same corporate entity, AWS financial success vs FTC regulatory action'
+    based_on_real_event: true,
+    notes: 'Based on a real event: Hard Negative: Same corporate entity, AWS financial success vs FTC regulatory action'
   },
   {
     id: 'n16',
@@ -476,7 +479,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'hard_negative',
     category: 'tech',
-    synthetic: true,
+    based_on_real_event: false,
     notes: 'Synthetic Hard Negative: Same entities (Apple, Masimo), legal settlement vs import ban'
   },
 
@@ -488,7 +491,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Tech product launch vs geological disaster'
   },
   {
@@ -498,7 +501,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Monetary policy vs astronomy research'
   },
   {
@@ -508,7 +511,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Corporate earnings vs European politics'
   },
   {
@@ -518,7 +521,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: AI software update vs sports tournament'
   },
   {
@@ -528,7 +531,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Aerospace engineering vs archaeology discovery'
   },
   {
@@ -538,7 +541,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Antitrust regulatory penalty vs extreme weather disaster'
   },
   {
@@ -548,7 +551,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Market valuation milestone vs scientific award'
   },
   {
@@ -558,7 +561,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Manufacturing labor union vs frontier AI weights release'
   },
   {
@@ -568,7 +571,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Semiconductor manufacturing earnings vs motor racing venue'
   },
   {
@@ -578,7 +581,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Medical treatment clearance vs cryptocurrency price surge'
   },
   {
@@ -588,7 +591,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Enterprise cloud revenue vs paleontology fossil discovery'
   },
   {
@@ -598,7 +601,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: AI agent capability vs international sporting games'
   },
   {
@@ -608,7 +611,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Central banking monetary policy vs Hollywood film production'
   },
   {
@@ -618,7 +621,7 @@ export const PAIRS = [
     is_duplicate: false,
     difficulty: 'easy_negative',
     category: 'cross_domain',
-    synthetic: false,
+    based_on_real_event: true,
     notes: 'Easy Negative: Private investment fund vs global health emergency'
   }
 ];
@@ -630,14 +633,18 @@ export function buildPairsFiles() {
   }
 
   const jsonlPath = path.join(dataDir, 'pairs.jsonl');
-  const lines = PAIRS.map(p => JSON.stringify(p)).join('\n');
+  const lines = PAIRS.map(p => JSON.stringify({
+    ...p,
+    synthetic: true,
+    provenance: 'AI-authored headline text; not copied from a published source; awaiting human review'
+  })).join('\n');
   fs.writeFileSync(jsonlPath, lines, 'utf8');
 
   console.log(`✅ Saved ${PAIRS.length} headline pairs to ${jsonlPath}`);
   console.log(`   - Duplicates (Positives): ${PAIRS.filter(p => p.is_duplicate).length} (15 easy, 15 hard)`);
   console.log(`   - Non-Duplicates (Negatives): ${PAIRS.filter(p => !p.is_duplicate).length} (16 hard, 14 easy)`);
-  console.log(`   - Synthetically Authored: ${PAIRS.filter(p => p.synthetic).length}`);
-  console.log(`   - Real-World Wire Derived: ${PAIRS.filter(p => !p.synthetic).length}`);
+  console.log(`   - All ${PAIRS.length} pairs AI-authored (synthetic: true)`);
+  console.log(`   - Based on a real event: ${PAIRS.filter(p => p.based_on_real_event).length}, invented scenario: ${PAIRS.filter(p => !p.based_on_real_event).length}`);
 }
 
 if (process.argv[1]?.endsWith('data_builder.js')) {
