@@ -10,6 +10,7 @@ import { generateExtractiveMicroSummary } from '../api/lib/extractive.js';
 import { evaluateGroundedness } from '../api/lib/groundedness.js';
 import { cosineSimilarity } from '../api/lib/embedding.js';
 import { embedHeadline } from './lib/semantic_embedder.js';
+import { SEMANTIC_MATCH_THRESHOLD } from '../api/lib/models.js';
 
 // Sleep helper for simulating realistic remote API round-trip times
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -35,7 +36,7 @@ class MockSupabaseDB {
     return this.table.get(url) || null;
   }
 
-  async matchSummaries(queryEmbedding, threshold = 0.92, maxAgeHours = 48) {
+  async matchSummaries(queryEmbedding, threshold = SEMANTIC_MATCH_THRESHOLD, maxAgeHours = 48) {
     let bestMatch = null;
     let highestSim = -1;
     const now = Date.now();
@@ -121,7 +122,7 @@ export async function runReplayEval() {
     // STEP 2: Semantic Cache Lookup via (simulated) Embedding
     // --------------------------------------------------------------------------
     const embedding = embedHeadline(art.title);
-    const semanticMatches = await db.matchSummaries(embedding, 0.92, 48);
+    const semanticMatches = await db.matchSummaries(embedding, SEMANTIC_MATCH_THRESHOLD, 48);
 
     if (semanticMatches.length > 0) {
       const hit = semanticMatches[0];

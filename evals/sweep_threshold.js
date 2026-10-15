@@ -9,9 +9,10 @@ import path from 'path';
 import { cosineSimilarity } from '../api/lib/embedding.js';
 import { embedHeadline } from './lib/semantic_embedder.js';
 import { SimpleCanvas } from './lib/png.js';
+import { SEMANTIC_MATCH_THRESHOLD } from '../api/lib/models.js';
 
 const PAIR_EMBEDDINGS_PATH = path.resolve('evals/data/pair_embeddings.json');
-const PRODUCTION_THRESHOLD = 0.92;
+const PRODUCTION_THRESHOLD = SEMANTIC_MATCH_THRESHOLD;
 
 /**
  * Picks the embedder. Real cached production-model vectors are used when
@@ -62,9 +63,12 @@ export function runThresholdSweep() {
     return { ...p, similarity: sim };
   });
 
-  // Thresholds to sweep: 0.80 to 0.98 in increments of 0.01
+  // Thresholds to sweep: SWEEP_MIN (default 0.50) to 0.98 in increments of 0.01.
+  // Originally 0.80-0.98; widened because real gemini-embedding-001 scores put
+  // every non-duplicate below 0.79, so the useful region was outside the window.
+  const sweepMin = Math.round(Number(process.env.SWEEP_MIN || 0.5) * 100);
   const thresholds = [];
-  for (let t = 80; t <= 98; t += 1) {
+  for (let t = sweepMin; t <= 98; t += 1) {
     thresholds.push(Number((t / 100).toFixed(2)));
   }
 
@@ -136,7 +140,7 @@ export function runThresholdSweep() {
     highestNonDuplicate
   };
 
-  // Is 0.92 dominated? (another threshold with >= precision AND > recall)
+  // Is the production threshold dominated? (another threshold with >= precision AND > recall)
   const dominatedBy = sweepResults.filter(r =>
     r.threshold !== PRODUCTION_THRESHOLD &&
     r.precision >= defaultRecord.precision &&
@@ -147,17 +151,18 @@ export function runThresholdSweep() {
   const lines = [];
   lines.push(`Peak F1 is ${bestRecord.f1}% at ${bestThreshold}. At ${PRODUCTION_THRESHOLD}: precision ${defaultRecord.precision}%, recall ${defaultRecord.recall}%, F1 ${defaultRecord.f1}%.`);
   if (bestDominator) {
-    lines.push(`${PRODUCTION_THRESHOLD} is dominated on this dataset: ${bestDominator.threshold} has the same or better precision (${bestDominator.precision}%) and higher recall (${bestDominator.recall}%). The data does not support 0.92 as the best choice.`);
+    lines.push(`${PRODUCTION_THRESHOLD} is dominated on this dataset: ${bestDominator.threshold} has the same or better precision (${bestDominator.precision}%) and higher recall (${bestDominator.recall}%). On this data alone, ${bestDominator.threshold} would be at least as good.`);
   } else {
     lines.push(`No threshold in the sweep beats ${PRODUCTION_THRESHOLD} on both precision and recall.`);
   }
+  lines.push(`Margin: the production threshold sits ${(PRODUCTION_THRESHOLD - separation.maxNonDuplicate).toFixed(4)} above the highest-scoring different-story pair ([${highestNonDuplicate.id}], ${separation.maxNonDuplicate.toFixed(4)}). Negative = some different stories would be merged.`);
   if (separation.minDuplicate > separation.maxNonDuplicate) {
     lines.push(`Classes are fully separable: every duplicate scores above ${separation.maxNonDuplicate.toFixed(4)} and every non-duplicate scores at or below it. Any threshold in (${separation.maxNonDuplicate.toFixed(4)}, ${separation.minDuplicate.toFixed(4)}] is perfect on this set.`);
   } else {
     lines.push(`Classes overlap: lowest-scoring duplicate ${separation.minDuplicate.toFixed(4)} ([${lowestDuplicate.id}]) < highest-scoring non-duplicate ${separation.maxNonDuplicate.toFixed(4)} ([${highestNonDuplicate.id}]). No threshold is perfect.`);
   }
   if (embedder.kind === 'simulated') {
-    lines.push('These similarities come from a simulated embedder written against this same dataset. Treat the whole sweep as a harness smoke test, not as evidence for or against 0.92.');
+    lines.push('These similarities come from a simulated embedder written against this same dataset. Treat the whole sweep as a harness smoke test, not as evidence for or against any threshold.');
   }
   const honestAssessment = lines.join(' ');
 
@@ -185,7 +190,7 @@ export function runThresholdSweep() {
   };
 }
 
-function renderChartPng(results, _bestT, embedderKind = 'simulated') {
+function renderChartPng(results, _bestT, embedderKind = 'simulated', productionThreshold = PRODUCTION_THRESHOLD) {
   const width = 720;
   const height = 400;
   const canvas = new SimpleCanvas(width, height, [248, 250, 252, 255]); // slate-50 background
@@ -223,19 +228,19 @@ function renderChartPng(results, _bestT, embedderKind = 'simulated') {
   const getY = (val) => padTop + chartH - (val / 100) * chartH;
 
   // X-axis tick labels
-  for (let i = 0; i < results.length; i += 2) {
+  for (let i = 0; i < results.length; i += (results.length > 25 ? 4 : 2)) {
     const r = results[i];
     const x = getX(r.threshold);
     canvas.drawLine(x, padTop + chartH, x, padTop + chartH + 5, [148, 163, 184, 255], 1);
     canvas.drawText(r.threshold.toFixed(2), x - 12, padTop + chartH + 10, [100, 116, 139, 255], 1);
   }
 
-  // Draw 0.92 marker line
-  const x92 = getX(0.92);
+  // Draw production threshold marker line
+  const x92 = getX(productionThreshold);
   for (let y = padTop; y < padTop + chartH; y += 4) {
     canvas.setPixel(Math.round(x92), y, 225, 29, 72, 255); // rose-600 dotted
   }
-  canvas.drawText('0.92 DEFAULT', x92 - 32, padTop - 12, [225, 29, 72, 255], 1);
+  canvas.drawText(`${productionThreshold.toFixed(2)} PRODUCTION`, x92 - 40, padTop - 12, [225, 29, 72, 255], 1);
 
   // Plot Precision (Blue: 37, 99, 235)
   for (let i = 0; i < results.length - 1; i++) {
@@ -276,7 +281,7 @@ function renderChartPng(results, _bestT, embedderKind = 'simulated') {
   canvas.drawText('F1 SCORE', padLeft + 218, legY + 1, [147, 51, 234, 255], 1);
 
   canvas.drawRect(padLeft + 300, legY, 14, 8, [225, 29, 72, 255]);
-  canvas.drawText('0.92 THRESHOLD', padLeft + 318, legY + 1, [225, 29, 72, 255], 1);
+  canvas.drawText('PRODUCTION THRESHOLD', padLeft + 318, legY + 1, [225, 29, 72, 255], 1);
 
   const outPath = path.resolve('evals/threshold_sweep.png');
   fs.writeFileSync(outPath, canvas.toBuffer());
