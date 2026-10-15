@@ -13,6 +13,7 @@ import path from 'path';
 import { runThresholdSweep } from './sweep_threshold.js';
 import { runGroundednessEval } from './eval_groundedness.js';
 import { runReplayEval } from './eval_replay.js';
+import { estimateCost } from './estimate_cost.js';
 
 // Regression floors = values measured when this harness was last reviewed.
 // They are guards against silent regressions, NOT quality targets.
@@ -43,6 +44,7 @@ export async function runAllEvals() {
   const sweep = runThresholdSweep();
   const g = runGroundednessEval();
   const replay = await runReplayEval();
+  const cost = estimateCost();
 
   const timestamp = new Date().toISOString();
   const pairs = sweep.scoredPairs;
@@ -132,6 +134,19 @@ Replays \`evals/data/feed_fixture.json\` (${replay.totalArticles} AI-authored ar
 
 - Cache hits: **${replay.totalHits}/${replay.totalArticles}** (${replay.cacheHitRate}%): ${replay.semanticHits} semantic, ${replay.exactHits} exact, ${replay.cacheMisses} misses.
 - Tier 2 tokens saved: **${replay.tokenEfficiency}%**, *modelled* with fixed constants (${replay.modelledTokens.tier2Generation} generation + ${replay.modelledTokens.embedding} embedding tokens per call): consumed ${replay.tokensConsumed}, saved ${replay.tokensSaved}.
+
+---
+
+## 4. Cost per 1,000 summaries (input side)
+
+Measured from the exact prompt \`buildTier2Prompt\` produces; tokens estimated as chars/4 (rule of thumb, not a tokenizer count). No prices are hard-coded: run \`evals/estimate_cost.js\` with your current prices to get a dollar figure.
+
+| Prompt | Chars | Est. input tokens |
+|---|---|---|
+| Fixture average (short AI-authored articles) | ${cost.fixtureAvgPromptChars} | ${cost.fixtureAvgInputTokensEst} |
+| Upper bound (500-char title, 4,000-char content cap) | ${cost.upperBoundPromptChars} | ${cost.upperBoundInputTokensEst} |
+
+Formula: \`cost_per_1k = 1000 × (1 − hit_rate) × (in_tokens × price_in + out_tokens × price_out) / 1e6\`. Output tokens and the real hit rate are not measured here.
 
 ---
 

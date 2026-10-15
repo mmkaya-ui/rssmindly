@@ -73,6 +73,24 @@ export function redactSecrets(message, secrets = []) {
   return out;
 }
 
+export const TIER2_CONTENT_CHAR_LIMIT = 4000;
+
+/**
+ * Builds the Tier 2 (3-bullet) prompt. Exported so evals/estimate_cost.js can
+ * measure the exact prompt size instead of a copy that could drift.
+ */
+export function buildTier2Prompt({ title = '', source = 'RSS Feed', content = '' }) {
+  return `You are an elite, fact-focused financial and tech journalist.
+Summarize this news article in 2-3 high-impact, factual bullet points.
+Output valid HTML using <ul> and <li> tags only. Do not wrap in markdown code blocks.
+CRITICAL: Only use numbers, dates, company names, and claims directly supported by the article.
+
+Title: ${title}
+Source: ${source}
+Article Content:
+${content.slice(0, TIER2_CONTENT_CHAR_LIMIT)}`;
+}
+
 export default async function handler(req, res) {
   // 1. HTTP Method validation
   if (req.method !== 'POST') {
@@ -263,15 +281,7 @@ export default async function handler(req, res) {
       generationConfig: { temperature: 0.2 }
     });
 
-    const tier2Prompt = `You are an elite, fact-focused financial and tech journalist.
-Summarize this news article in 2-3 high-impact, factual bullet points.
-Output valid HTML using <ul> and <li> tags only. Do not wrap in markdown code blocks.
-CRITICAL: Only use numbers, dates, company names, and claims directly supported by the article.
-
-Title: ${title}
-Source: ${source}
-Article Content:
-${content.slice(0, 4000)}`;
+    const tier2Prompt = buildTier2Prompt({ title, source, content });
 
     let tier2Result = await flashModel.generateContent(tier2Prompt);
     let summaryHtml = tier2Result.response.text().replace(/```html|```/g, '').trim();
