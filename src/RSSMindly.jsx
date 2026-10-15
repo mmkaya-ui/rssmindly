@@ -75,7 +75,7 @@ const SmartCacheService = {
     try {
       const item = localStorage.getItem(`smart_cache_${key}`);
       return item ? JSON.parse(item) : null;
-    } catch (e) { return null; }
+    } catch { return null; }
   },
   set: (key, data) => {
     try {
@@ -83,7 +83,7 @@ const SmartCacheService = {
         data,
         timestamp: Date.now()
       }));
-    } catch (e) { console.warn("Cache full"); }
+    } catch { console.warn("Cache full"); }
   }
 };
 
@@ -99,12 +99,12 @@ const detectCategoryRuleBased = (text) => {
       const regex = new RegExp(`\\b(${pattern})\\b`, 'gi');
       const matches = lower.match(regex);
       return matches ? matches.length : 0;
-    } catch (e) { return 0; }
+    } catch { return 0; }
   };
 
   addScore('Tech', countMatches('cybersecurity|artificial intelligence|ai|machine learning|blockchain|saas|technology|software|hardware|gadget|smartphone|app|server|cloud|digital|internet|usb|wifi|bluetooth|microsoft|google|meta|linux|windows|android|ios|nvidia|intel') * 1.5);
   addScore('Startups', countMatches('startup|founder|venture capital|seed round|unicorn|pitch deck|ipo|y combinator|incubator|accelerator') * 2);
-  addScore('Programming', countMatches('programming|coding|developer|software engineer|javascript|python|react|git|sql|database|api|backend|frontend|rust|golang|node\.js|typescript') * 2);
+  addScore('Programming', countMatches('programming|coding|developer|software engineer|javascript|python|react|git|sql|database|api|backend|frontend|rust|golang|node.js|typescript') * 2);
   addScore('Economy', countMatches('economy|inflation|gdp|recession|federal reserve|interest rate|tax|deficit|labor market|unemployment|cpi') * 2);
   addScore('Finance', countMatches('finance|stock market|wall street|crypto|bitcoin|investing|asset|wealth|fund|etf|portfolio|dividend|bank|banking') * 2);
   addScore('Business', countMatches('business|corporate|ceo|cfo|revenue|profit|supply chain|retail|enterprise|shareholder|acquisition|merger') * 1.5);
@@ -740,9 +740,9 @@ export default function RSSMindlyApp() {
       const jsonStr = await callGemini(prompt, apiKey, true);
       if (!jsonStr) return;
       let mapping = {};
-      try { mapping = JSON.parse(jsonStr); } catch (e) {
+      try { mapping = JSON.parse(jsonStr); } catch {
         const match = jsonStr.match(/\{[\s\S]*\}/);
-        if (match) try { mapping = JSON.parse(match[0]); } catch (e2) {}
+        if (match) try { mapping = JSON.parse(match[0]); } catch { /* ignore fallback error */ }
       }
       if (Object.keys(mapping).length > 0) {
         setArticles(prev => prev.map(a => mapping[a.guid] ? { ...a, category: mapping[a.guid], isAiCategorized: true } : a));
@@ -791,7 +791,7 @@ export default function RSSMindlyApp() {
       return items;
     };
 
-    try { return await xmlProxyRace(); } catch (xmlError) {
+    try { return await xmlProxyRace(); } catch {
       try {
         const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}`);
         if (!res.ok) throw new Error('RSS2JSON Failed');
@@ -807,7 +807,7 @@ export default function RSSMindlyApp() {
         }));
         feedCache.current[targetUrl] = { timestamp: Date.now(), data: items };
         return items;
-      } catch (jsonError) { return []; }
+      } catch { return []; }
     }
   };
 
@@ -830,7 +830,7 @@ export default function RSSMindlyApp() {
         const res = await fetch(searchUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
         if (res.ok) data = await res.json();
-      } catch (e1) {
+      } catch {
         const backupSearchUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://cloud.feedly.com/v3/search/feeds?query=${feedInput}&count=20`)}`;
         const res = await fetch(backupSearchUrl);
         if (res.ok) { const json = await res.json(); data = JSON.parse(json.contents); }
@@ -848,7 +848,7 @@ export default function RSSMindlyApp() {
         return;
       }
       throw new Error('No results');
-    } catch (error) {
+    } catch {
        try {
         const items = await fetchAndParseFeed(feedInput);
         if (items.length > 0) {
@@ -856,7 +856,7 @@ export default function RSSMindlyApp() {
           setDiscoveredFeeds([{ title: feedInput, url: ensureUrl(feedInput), description: 'Direct Link', category: detectedCat }]);
           setAddCategory(detectedCat);
         } else throw new Error('No items');
-       } catch (manualError) {
+       } catch {
           setDiscoveredFeeds([{ url: ensureUrl(feedInput), title: feedInput, description: 'Manual Entry', category: 'General' }]);
        }
     } finally { setIsDiscovering(false); }
@@ -1256,6 +1256,41 @@ export default function RSSMindlyApp() {
           <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Feed URL</label><input type="text" className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" value={editingFeed?.url || ''} onChange={(e) => setEditingFeed({ ...editingFeed, url: e.target.value })} required /></div>
           <div><label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Category</label><div className="relative"><input type="text" list="category-options" className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. Tech, Finance, Health" value={editingFeed?.category || ''} onChange={(e) => setEditingFeed({ ...editingFeed, category: e.target.value })} /><datalist id="category-options">{PREDEFINED_CATEGORIES.map(cat => (<option key={cat} value={cat} />))}</datalist></div></div>
           <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition-colors">Save Changes</button>
+        </form>
+      </Modal>
+
+      <Modal isOpen={showBundleModal} onClose={() => setShowBundleModal(false)} title="Create New Bundle">
+        <form onSubmit={handleCreateBundle} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Bundle Name</label>
+            <input
+              type="text"
+              placeholder="e.g. Morning Brief, Crypto, Daily AI"
+              value={bundleName}
+              onChange={(e) => setBundleName(e.target.value)}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Select Feeds to Include</label>
+            <div className="max-h-48 overflow-y-auto space-y-1 p-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+              {feeds.map(f => (
+                <label key={f.id} className="flex items-center gap-2 p-1.5 hover:bg-white dark:hover:bg-slate-600 rounded cursor-pointer text-xs">
+                  <input
+                    type="checkbox"
+                    checked={selectedFeedIdsForBundle.has(f.id)}
+                    onChange={() => toggleFeedInBundle(f.id)}
+                    className="rounded text-blue-600"
+                  />
+                  <span className="font-medium text-gray-800 dark:text-gray-200">{f.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium text-sm transition-colors">
+            Create Bundle
+          </button>
         </form>
       </Modal>
 

@@ -92,7 +92,8 @@ export function clusterTrendingStories(articles = [], options = {}) {
     for (const cluster of clusters) {
       // Check time window compatibility
       const clusterTime = cluster.latestTime;
-      const articleTime = new Date(article.pubDate || Date.now()).getTime();
+      const rawArticleTime = new Date(article.pubDate || Date.now()).getTime();
+      const articleTime = Number.isNaN(rawArticleTime) ? Date.now() : rawArticleTime;
       const diffHours = Math.abs(clusterTime - articleTime) / (1000 * 60 * 60);
 
       if (diffHours > maxTimeWindowHours) continue;
@@ -107,17 +108,20 @@ export function clusterTrendingStories(articles = [], options = {}) {
       }
     }
 
+    const rawArticleTime = new Date(article.pubDate || Date.now()).getTime();
+    const safeArticleTime = Number.isNaN(rawArticleTime) ? Date.now() : rawArticleTime;
+
     if (matchedCluster) {
       matchedCluster.articles.push({ ...article, signature: sig });
       matchedCluster.sources.add(article.source || 'Unknown');
-      matchedCluster.latestTime = Math.max(matchedCluster.latestTime, new Date(article.pubDate || Date.now()).getTime());
+      matchedCluster.latestTime = Math.max(matchedCluster.latestTime || 0, safeArticleTime);
     } else {
       const newCluster = {
         id: `trend_${Math.abs(Date.now() + clusters.length).toString(36)}`,
         leadArticle: article,
         articles: [{ ...article, signature: sig }],
         sources: new Set([article.source || 'Unknown']),
-        latestTime: new Date(article.pubDate || Date.now()).getTime(),
+        latestTime: safeArticleTime,
       };
       clusters.push(newCluster);
     }
@@ -142,7 +146,7 @@ export function clusterTrendingStories(articles = [], options = {}) {
       sources: uniqueSources,
       isTrending,
       trendScore: Number((sourceCount * 3.0 + articleCount * 1.5).toFixed(2)),
-      articles: c.articles.map(({ signature, ...rest }) => rest)
+      articles: c.articles.map(({ signature: _sig, ...rest }) => rest)
     };
   });
 

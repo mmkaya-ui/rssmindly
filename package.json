@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node scripts/test-semantic-pipeline.js",
+    "test": "node test/unit.test.js && node scripts/test-semantic-pipeline.js",
     "eval": "node evals/run_all.js"
   },
   "dependencies": {

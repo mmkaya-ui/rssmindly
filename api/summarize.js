@@ -8,7 +8,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createClient } from '@supabase/supabase-js';
-import { getFingerprintText, generateHeadlineEmbedding, cosineSimilarity } from './lib/embedding.js';
+import { getFingerprintText, generateHeadlineEmbedding } from './lib/embedding.js';
 import { evaluateGroundedness } from './lib/groundedness.js';
 import { generateExtractiveMicroSummary } from './lib/extractive.js';
 
@@ -19,6 +19,38 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY;
 // Semantic deduplication threshold: 0.92 cosine similarity
 const SEMANTIC_MATCH_THRESHOLD = 0.92;
 const MAX_CACHE_AGE_HOURS = 48;
+
+// Input size bounds to prevent resource exhaustion / DoS
+const MAX_TITLE_LENGTH = 500;
+const MAX_CONTENT_LENGTH = 50000;
+const MAX_URL_LENGTH = 2048;
+
+// In-memory sliding-window rate limiter (60 req/min per IP)
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const MAX_REQUESTS_PER_WINDOW = 60;
+const requestHistoryMap = new Map();
+
+function checkRateLimit(clientIp) {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+
+  // Periodic cleanup if map grows large (> 5000 entries)
+  if (requestHistoryMap.size > 5000) {
+    for (const [ip, timestamps] of requestHistoryMap.entries()) {
+      const active = timestamps.filter(t => t > windowStart);
+      if (active.length === 0) requestHistoryMap.delete(ip);
+      else requestHistoryMap.set(ip, active);
+    }
+  }
+
+  const timestamps = (requestHistoryMap.get(clientIp) || []).filter(t => t > windowStart);
+  if (timestamps.length >= MAX_REQUESTS_PER_WINDOW) {
+    return false;
+  }
+  timestamps.push(now);
+  requestHistoryMap.set(clientIp, timestamps);
+  return true;
+}
 
 /**
  * Creates clients safely
@@ -35,6 +67,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
 
+  // 2. Rate limiting check
+  const clientIp = (
+    req.headers['x-forwarded-for']?.split(',')[0] ||
+    req.headers['x-real-ip'] ||
+    req.socket?.remoteAddress ||
+    '127.0.0.1'
+  ).trim();
+
+  if (!checkRateLimit(clientIp)) {
+    return res.status(429).json({
+      error: 'Rate limit exceeded. Maximum 60 requests per minute.',
+      retryAfterSeconds: 60
+    });
+  }
+
   const {
     articleUrl,
     title = '',
@@ -45,10 +92,19 @@ export default async function handler(req, res) {
     clientApiKey = null
   } = req.body || {};
 
+  // 3. Input validation & size constraints
   if (!articleUrl || (!content && !title)) {
     return res.status(400).json({ error: 'Missing required fields: articleUrl and (title or content)' });
   }
 
+  if (articleUrl.length > MAX_URL_LENGTH || title.length > MAX_TITLE_LENGTH || content.length > MAX_CONTENT_LENGTH) {
+    return res.status(413).json({
+      error: 'Payload size exceeded allowed limits',
+      limits: { maxUrlLength: MAX_URL_LENGTH, maxTitleLength: MAX_TITLE_LENGTH, maxContentLength: MAX_CONTENT_LENGTH }
+    });
+  }
+
+  // 4. Client API key security: strictly used in memory for generative call; never saved to database or logged
   const apiKeyToUse = clientApiKey || GOOGLE_API_KEY;
   const { genAI: defaultGenAI, supabase } = getClients();
   const genAI = apiKeyToUse ? new GoogleGenerativeAI(apiKeyToUse) : defaultGenAI;
@@ -71,7 +127,7 @@ export default async function handler(req, res) {
     }
 
     // --------------------------------------------------------------------------
-    // STEP 1: EXACT URL CACHE LOOKUP (O(1))
+    // STEP 1: EXACT URL CACHE LOOKUP (O(1) with 48h TTL verification)
     // --------------------------------------------------------------------------
     const isLongMode = mode === 'tier3' || mode === 'detailed' || mode === 'long' || includeDeepDive;
 
@@ -83,38 +139,41 @@ export default async function handler(req, res) {
         .maybeSingle();
 
       if (exactMatch) {
-        // If user requested long/detailed summary and it's already cached
-        if (isLongMode && exactMatch.tier3_deepdive) {
-          return res.status(200).json({
-            summary: exactMatch.tier3_deepdive,
-            tier1: exactMatch.tier1_micro || tier1Micro,
-            tier2: exactMatch.tier2_bullets || exactMatch.text,
-            tier3: exactMatch.tier3_deepdive,
-            source: 'cache',
-            matchType: 'exact',
-            isLong: true,
-            groundednessScore: exactMatch.groundedness_score ?? 1.0,
-            groundednessReport: exactMatch.groundedness_report ?? {},
-            latencyMs: Date.now() - startTime
-          });
-        }
+        // Enforce 48-hour cache age invalidation
+        const cacheAgeHours = (Date.now() - new Date(exactMatch.created_at).getTime()) / (1000 * 60 * 60);
+        if (cacheAgeHours <= MAX_CACHE_AGE_HOURS) {
+          // If user requested long/detailed summary and it's already cached
+          if (isLongMode && exactMatch.tier3_deepdive) {
+            return res.status(200).json({
+              summary: exactMatch.tier3_deepdive,
+              tier1: exactMatch.tier1_micro || tier1Micro,
+              tier2: exactMatch.tier2_bullets || exactMatch.text,
+              tier3: exactMatch.tier3_deepdive,
+              source: 'cache',
+              matchType: 'exact',
+              isLong: true,
+              groundednessScore: exactMatch.groundedness_score ?? 1.0,
+              groundednessReport: exactMatch.groundedness_report ?? {},
+              latencyMs: Date.now() - startTime
+            });
+          }
 
-        // Return exact cache hit for standard summary
-        if (!isLongMode) {
-          // Increment hit count asynchronously
-          supabase.rpc('increment_summary_hit', { summary_id: exactMatch.id }).catch(() => {});
+          // Return exact cache hit for standard summary
+          if (!isLongMode) {
+            supabase.rpc('increment_summary_hit', { summary_id: exactMatch.id }).catch(() => {});
 
-          return res.status(200).json({
-            summary: exactMatch.text || exactMatch.tier2_bullets,
-            tier1: exactMatch.tier1_micro || tier1Micro,
-            tier2: exactMatch.tier2_bullets || exactMatch.text,
-            tier3: exactMatch.tier3_deepdive || null,
-            source: 'cache',
-            matchType: 'exact',
-            groundednessScore: exactMatch.groundedness_score ?? 1.0,
-            groundednessReport: exactMatch.groundedness_report ?? {},
-            latencyMs: Date.now() - startTime
-          });
+            return res.status(200).json({
+              summary: exactMatch.text || exactMatch.tier2_bullets,
+              tier1: exactMatch.tier1_micro || tier1Micro,
+              tier2: exactMatch.tier2_bullets || exactMatch.text,
+              tier3: exactMatch.tier3_deepdive || null,
+              source: 'cache',
+              matchType: 'exact',
+              groundednessScore: exactMatch.groundedness_score ?? 1.0,
+              groundednessReport: exactMatch.groundedness_report ?? {},
+              latencyMs: Date.now() - startTime
+            });
+          }
         }
       }
     }
@@ -141,10 +200,8 @@ export default async function handler(req, res) {
           const semanticHit = matches[0];
           const similarityScore = Number((semanticHit.similarity || 0).toFixed(4));
 
-          // Increment hit count asynchronously
           supabase.rpc('increment_summary_hit', { summary_id: semanticHit.id }).catch(() => {});
 
-          // If mode is long/detailed and cached, return it; or return standard summary
           if (!isLongMode || semanticHit.tier3_deepdive) {
             return res.status(200).json({
               summary: isLongMode && semanticHit.tier3_deepdive ? semanticHit.tier3_deepdive : (semanticHit.text || semanticHit.tier2_bullets),
@@ -173,7 +230,6 @@ export default async function handler(req, res) {
     // STEP 3 (Tier 2): CACHE MISS — GENERATE 3-BULLET TAKEAWAY VIA GEMINI FLASH
     // --------------------------------------------------------------------------
     if (!genAI) {
-      // Fallback: If no Gemini key is provided at all, return Tier 1 extractive micro-summary
       return res.status(200).json({
         summary: `<ul><li>${tier1Micro}</li></ul>`,
         tier1: tier1Micro,
@@ -202,21 +258,19 @@ ${content.slice(0, 4000)}`;
     let summaryHtml = tier2Result.response.text().replace(/```html|```/g, '').trim();
 
     // --------------------------------------------------------------------------
-    // STEP 4: SELF-EVALUATING GROUNDEDNESS & ZERO HALLUCINATION GUARANTEE
+    // STEP 4: SELF-EVALUATING GROUNDEDNESS & ZERO HALLUCINATION RE-GENERATION
     // --------------------------------------------------------------------------
     let groundedness = evaluateGroundedness(summaryHtml, content, title);
 
-    // If numbers or currencies were hallucinated, trigger deterministic regeneration with temperature 0.0
-    if (!groundedness.isGrounded && groundedness.numberViolationsCount > 0) {
-      console.warn('Groundedness violation detected! Hallucinated numbers:', groundedness.violations);
-
+    // If ungrounded (number violations or score < 0.80), trigger strict regeneration with temperature 0.0
+    if (!groundedness.isGrounded) {
       const strictModel = genAI.getGenerativeModel({
         model: 'gemini-1.5-flash',
         generationConfig: { temperature: 0.0 }
       });
 
       const strictPrompt = `ZERO HALLUCINATION RE-GENERATION:
-The previous summary contained ungrounded or unverified metrics:
+The previous summary contained ungrounded or unverified metrics/entities:
 ${groundedness.violations.map(v => `- ${v.reason}`).join('\n')}
 
 Re-summarize this article into 2-3 concise bullet points.
@@ -231,7 +285,6 @@ ${content.slice(0, 4000)}`;
       const regeneratedHtml = strictResult.response.text().replace(/```html|```/g, '').trim();
 
       const recheckedGroundedness = evaluateGroundedness(regeneratedHtml, content, title);
-      // Use regenerated if improved or free of number violations
       if (recheckedGroundedness.numberViolationsCount === 0 || recheckedGroundedness.score > groundedness.score) {
         summaryHtml = regeneratedHtml;
         groundedness = recheckedGroundedness;
@@ -275,11 +328,10 @@ ${content.slice(0, 5000)}`;
     }
 
     // --------------------------------------------------------------------------
-    // WRITE TO SUPABASE CACHE WITH PGVECTOR EMBEDDING
+    // WRITE TO SUPABASE CACHE WITH PGVECTOR EMBEDDING (clientApiKey NEVER stored)
     // --------------------------------------------------------------------------
     if (supabase) {
       try {
-        // If embedding wasn't generated earlier, generate now before caching
         if (!embedding && apiKeyToUse) {
           embedding = await generateHeadlineEmbedding(fingerprintText, apiKeyToUse);
         }
@@ -309,7 +361,7 @@ ${content.slice(0, 5000)}`;
     // FINAL RESPONSE
     // --------------------------------------------------------------------------
     return res.status(200).json({
-      summary: mode === 'tier3' && tier3DeepDive ? tier3DeepDive : summaryHtml,
+      summary: isLongMode && tier3DeepDive ? tier3DeepDive : summaryHtml,
       tier1: tier1Micro,
       tier2: summaryHtml,
       tier3: tier3DeepDive,
@@ -321,10 +373,13 @@ ${content.slice(0, 5000)}`;
     });
 
   } catch (error) {
-    console.error('Summarization pipeline failure:', error);
+    // Sanitize error logging to ensure clientApiKey is never leaked into server logs
+    const sanitizedMsg = (error.message || '').replace(new RegExp(clientApiKey || '____NOMATCH____', 'g'), '[REDACTED_KEY]');
+    console.error('Summarization pipeline failure:', sanitizedMsg);
+
     return res.status(500).json({
       error: 'Failed to generate summary',
-      details: error.message
+      details: sanitizedMsg
     });
   }
 }

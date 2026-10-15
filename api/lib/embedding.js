@@ -50,6 +50,8 @@ export function cosineSimilarity(vecA, vecB) {
     normA += vecA[i] * vecA[i];
     normB += vecB[i] * vecB[i];
   }
-  if (normA === 0 || normB === 0) return 0;
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  if (normA === 0 || normB === 0 || !Number.isFinite(normA) || !Number.isFinite(normB)) return 0;
+  const sim = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  if (!Number.isFinite(sim)) return 0;
+  return Math.max(-1, Math.min(1, sim));
 }

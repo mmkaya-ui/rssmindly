@@ -2,7 +2,7 @@
 // RSSMindly — Comprehensive Test Suite for Steps 1, 2, 3 & 4
 // ==============================================================================
 
-import { getFingerprintText, cosineSimilarity } from '../api/lib/embedding.js';
+import { cosineSimilarity } from '../api/lib/embedding.js';
 import { evaluateGroundedness } from '../api/lib/groundedness.js';
 import { generateExtractiveMicroSummary } from '../api/lib/extractive.js';
 import { clusterTrendingStories } from '../api/lib/clustering.js';

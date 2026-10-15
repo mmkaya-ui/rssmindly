@@ -168,7 +168,7 @@ async function simulateSummarizeRequest(story) {
   let bestMatch = null;
   let highestSim = 0;
 
-  for (const [id, cached] of mockPgVectorDB.entries()) {
+  for (const [_id, cached] of mockPgVectorDB.entries()) {
     const sim = cosineSimilarity(queryEmbedding, cached.embedding);
     if (sim > highestSim) {
       highestSim = sim;
