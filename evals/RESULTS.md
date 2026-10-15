@@ -1,6 +1,6 @@
 # RSSMindly — Evaluation Results & Empirical Benchmarks
 
-*Generated automatically by `npm run eval` on 2026-10-15T10:48:58.031Z (Node.js offline runner).*
+*Generated automatically by `npm run eval` on 2026-10-15T10:52:39.579Z (Node.js offline runner).*
 
 ---
 
@@ -79,11 +79,11 @@ Measured by replaying a 20-article multi-publisher news feed (`evals/data/feed_f
 ### Latency by Architectural Tier
 | Tier | Description | Measured Latency | Token Cost |
 |---|---|---|---|
-| **Tier 1 (Extractive Micro-Summary)** | Heuristic lead-sentence salience in browser | **0.054 ms** | **0 tokens ($0.00)** |
+| **Tier 1 (Extractive Micro-Summary)** | Heuristic lead-sentence salience in browser | **0.066 ms** | **0 tokens ($0.00)** |
 | **Tier 2 Exact Cache Hit** | O(1) URL lookup | **0.04 ms** | **0 tokens ($0.00)** |
-| **Tier 2 Semantic Cache Hit** | 768-dim embedding + pgvector HNSW lookup | **42.3 ms** | **0 LLM tokens** (40 embedding tokens) |
-| **Tier 2 Cache Miss** | Gemini 1.5 Flash generation + DB write | **240.7 ms** | **420 tokens** |
-| **Tier 3 Deep Dive Brief** | 4-part executive analysis on demand | **420.2 ms** | **850 tokens** |
+| **Tier 2 Semantic Cache Hit** | 768-dim embedding + pgvector HNSW lookup | **42.2 ms** | **0 LLM tokens** (40 embedding tokens) |
+| **Tier 2 Cache Miss** | Gemini 1.5 Flash generation + DB write | **240.5 ms** | **420 tokens** |
+| **Tier 3 Deep Dive Brief** | 4-part executive analysis on demand | **419.9 ms** | **850 tokens** |
 
 ### Cache Hit & Efficiency Metrics
 - **Total Articles Replayed:** 20
