@@ -61,6 +61,18 @@ function getClients() {
   return { genAI, supabase };
 }
 
+/**
+ * Removes any occurrence of the given secrets from a message before it is logged
+ * or returned. Uses split/join, so key characters are never interpreted as regex.
+ */
+export function redactSecrets(message, secrets = []) {
+  let out = String(message ?? '');
+  for (const s of secrets) {
+    if (typeof s === 'string' && s.length >= 8) out = out.split(s).join('[REDACTED_KEY]');
+  }
+  return out;
+}
+
 export default async function handler(req, res) {
   // 1. HTTP Method validation
   if (req.method !== 'POST') {
@@ -93,6 +105,12 @@ export default async function handler(req, res) {
   } = req.body || {};
 
   // 3. Input validation & size constraints
+  const stringFields = { articleUrl, title, content, source, mode };
+  const badType = Object.entries(stringFields).find(([, v]) => v !== undefined && typeof v !== 'string');
+  if (badType || (clientApiKey !== null && typeof clientApiKey !== 'string')) {
+    return res.status(400).json({ error: `Invalid field type: ${badType ? badType[0] : 'clientApiKey'} must be a string` });
+  }
+
   if (!articleUrl || (!content && !title)) {
     return res.status(400).json({ error: 'Missing required fields: articleUrl and (title or content)' });
   }
@@ -106,6 +124,7 @@ export default async function handler(req, res) {
 
   // 4. Client API key security: strictly used in memory for generative call; never saved to database or logged
   const apiKeyToUse = clientApiKey || GOOGLE_API_KEY;
+  const secrets = [clientApiKey, GOOGLE_API_KEY, SUPABASE_KEY];
   const { genAI: defaultGenAI, supabase } = getClients();
   const genAI = apiKeyToUse ? new GoogleGenerativeAI(apiKeyToUse) : defaultGenAI;
 
@@ -222,7 +241,7 @@ export default async function handler(req, res) {
           }
         }
       } catch (embErr) {
-        console.warn('Semantic embedding lookup skipped or failed:', embErr.message);
+        console.warn('Semantic embedding lookup skipped or failed:', redactSecrets(embErr.message, secrets));
       }
     }
 
@@ -323,7 +342,7 @@ ${content.slice(0, 5000)}`;
         const deepResult = await deepModel.generateContent(deepPrompt);
         tier3DeepDive = deepResult.response.text().replace(/```html|```/g, '').trim();
       } catch (deepErr) {
-        console.warn('Long summary generation failed:', deepErr.message);
+        console.warn('Long summary generation failed:', redactSecrets(deepErr.message, secrets));
       }
     }
 
@@ -353,7 +372,7 @@ ${content.slice(0, 5000)}`;
 
         await supabase.from('summaries').upsert(cacheRecord, { onConflict: 'url' });
       } catch (cacheErr) {
-        console.warn('Failed to persist summary into Supabase cache:', cacheErr.message);
+        console.warn('Failed to persist summary into Supabase cache:', redactSecrets(cacheErr.message, secrets));
       }
     }
 
@@ -374,7 +393,7 @@ ${content.slice(0, 5000)}`;
 
   } catch (error) {
     // Sanitize error logging to ensure clientApiKey is never leaked into server logs
-    const sanitizedMsg = (error.message || '').replace(new RegExp(clientApiKey || '____NOMATCH____', 'g'), '[REDACTED_KEY]');
+    const sanitizedMsg = redactSecrets(error.message, secrets);
     console.error('Summarization pipeline failure:', sanitizedMsg);
 
     return res.status(500).json({
