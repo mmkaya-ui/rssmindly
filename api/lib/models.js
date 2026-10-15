@@ -24,6 +24,21 @@ export const EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-emb
 // to 3072 dims; outputDimensionality truncates it (Matryoshka representation).
 export const EMBEDDING_DIMENSIONS = 768;
 
+/**
+ * Cosine threshold for reusing another outlet's summary. It is calibrated PER
+ * EMBEDDING MODEL: score distributions differ between models.
+ *
+ * 0.92 was chosen for text-embedding-004 but never measured. With
+ * gemini-embedding-001 (measured 2026-10-15, see evals/RESULTS.md and
+ * evals/LIVE_RESULTS.md):
+ *   - 60 headline pairs: highest different-story score 0.7821; 0.79-0.81 is the
+ *     lowest region with 0 false merges; 0.92 caught 1/30 duplicates.
+ *   - live fingerprints (headline + body): duplicates 0.825-0.922, unrelated
+ *     stories <= 0.676; 0.92 caught 3 of 9 duplicate articles.
+ * 0.80 = smallest round value above every observed different-story score.
+ */
+export const SEMANTIC_MATCH_THRESHOLD = Number(process.env.SEMANTIC_MATCH_THRESHOLD || 0.80);
+
 // Errors where trying a different model can help.
 const RETRYABLE_STATUS = new Set([404, 429, 500, 503]);
 

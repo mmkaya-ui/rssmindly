@@ -10,7 +10,7 @@ import { clusterTrendingStories } from './lib/clustering.js';
 import { getFingerprintText, generateHeadlineEmbedding } from './lib/embedding.js';
 import { evaluateGroundedness } from './lib/groundedness.js';
 import { generateExtractiveMicroSummary } from './lib/extractive.js';
-import { generateWithFallback } from './lib/models.js';
+import { generateWithFallback, SEMANTIC_MATCH_THRESHOLD } from './lib/models.js';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -144,7 +144,7 @@ export default async function handler(req, res) {
 
       const { data: semanticMatches } = await supabase.rpc('match_summaries', {
         query_embedding: embedding,
-        match_threshold: 0.92,
+        match_threshold: SEMANTIC_MATCH_THRESHOLD,
         match_count: 1,
         max_age_hours: 48
       });

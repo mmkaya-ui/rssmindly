@@ -21,7 +21,7 @@ export const REGRESSION_FLOORS = {
   groundednessDevAccuracy: 100,      // dev set is tuned; anything less is a regression
   groundednessHeldoutAccuracy: 50,   // frozen held-out set, current code
   groundednessHeldoutRecall: 41.7,
-  replayCacheHits: 5                 // deterministic with the simulated embedder
+  replayCacheHits: 7                 // deterministic with the simulated embedder at the production threshold
 };
 
 const fmtPct = (v) => (v === null || v === undefined ? 'n/a' : `${v}%`);
@@ -74,6 +74,8 @@ export async function runAllEvals() {
 | 2. Groundedness | Production \`evaluateGroundedness\` run on fixed cases | Cases are AI-authored; dev set was used for tuning |
 | 3. Replay | Tier 1 latency, cache logic | Tier 2/3 latency (sleep), token counts (constants), hit/miss (simulated embedder) |
 
+Real-API numbers (actual Gemini calls via the BYOK path, real latency and token usage, real embeddings on production fingerprints) are in [\`LIVE_RESULTS.md\`](LIVE_RESULTS.md), produced by \`evals/live_byok_benchmark.js\`. That run needs a key, so it is not part of CI.
+
 ---
 
 ## 1. Cosine threshold sweep (dedup quality)
@@ -90,7 +92,7 @@ ${sweepTableRows}
 
 ![Threshold sweep](threshold_sweep.png)
 
-### Verdict on 0.92 (computed, not hand-written)
+### Verdict on the production threshold (${sweep.defaultThreshold}), computed, not hand-written
 ${sweep.assessmentLines.map(l => `- ${l}`).join('\n')}
 
 ---

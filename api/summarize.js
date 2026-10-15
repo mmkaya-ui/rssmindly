@@ -11,14 +11,14 @@ import { createClient } from '@supabase/supabase-js';
 import { getFingerprintText, generateHeadlineEmbedding } from './lib/embedding.js';
 import { evaluateGroundedness } from './lib/groundedness.js';
 import { generateExtractiveMicroSummary } from './lib/extractive.js';
-import { generateWithFallback, addUsage, EMPTY_USAGE } from './lib/models.js';
+import { generateWithFallback, addUsage, EMPTY_USAGE, SEMANTIC_MATCH_THRESHOLD as MODEL_SEMANTIC_THRESHOLD } from './lib/models.js';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
-// Semantic deduplication threshold: 0.92 cosine similarity
-const SEMANTIC_MATCH_THRESHOLD = 0.92;
+// Semantic deduplication threshold: calibrated per embedding model, see api/lib/models.js
+const SEMANTIC_MATCH_THRESHOLD = MODEL_SEMANTIC_THRESHOLD;
 const MAX_CACHE_AGE_HOURS = 48;
 
 // Input size bounds to prevent resource exhaustion / DoS
