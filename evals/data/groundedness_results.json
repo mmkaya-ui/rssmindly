@@ -1,285 +1,1269 @@
 {
-  "total": 30,
-  "tp": 16,
-  "tn": 14,
-  "fp": 0,
-  "fn": 0,
-  "accuracy": 100,
-  "precision": 100,
-  "recall": 100,
-  "f1": 100,
-  "falsePositives": [],
-  "falseNegatives": [],
-  "results": [
-    {
-      "id": "g01",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 0.88,
-      "violationsCount": 1,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g02",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g03",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 0.8,
-      "violationsCount": 1,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g04",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g05",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 0.8,
-      "violationsCount": 1,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g06",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g07",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g08",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 0.8,
-      "violationsCount": 1,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g09",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g10",
-      "category": "clean_grounded",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 0.8,
-      "violationsCount": 1,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g11",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.67,
-      "violationsCount": 2,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g12",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.8,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g13",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.33,
-      "violationsCount": 2,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g14",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g15",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.67,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g16",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g17",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g18",
-      "category": "injected_wrong_number",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 2,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g19",
-      "category": "injected_wrong_entity",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.33,
-      "violationsCount": 2,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g20",
-      "category": "injected_wrong_entity",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g21",
-      "category": "injected_wrong_entity",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g22",
-      "category": "injected_wrong_entity",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g23",
-      "category": "injected_wrong_entity",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g24",
-      "category": "injected_wrong_entity",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g25",
-      "category": "formatting_edge_case",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g26",
-      "category": "formatting_edge_case",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g27",
-      "category": "formatting_edge_case",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    },
-    {
-      "id": "g28",
-      "category": "single_digit_hallucination",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0.5,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g29",
-      "category": "split_name_coincidence",
-      "expected": "HALLUCINATED",
-      "predicted": "HALLUCINATED",
-      "score": 0,
-      "violationsCount": 1,
-      "outcome": "TP (Correctly caught hallucination)"
-    },
-    {
-      "id": "g30",
-      "category": "sentence_starter_stopword",
-      "expected": "GROUNDED",
-      "predicted": "GROUNDED",
-      "score": 1,
-      "violationsCount": 0,
-      "outcome": "TN (Correctly passed grounded)"
-    }
-  ]
+  "devCurrent": {
+    "total": 30,
+    "tp": 16,
+    "tn": 14,
+    "fp": 0,
+    "fn": 0,
+    "accuracy": 100,
+    "precision": 100,
+    "recall": 100,
+    "f1": 100,
+    "falsePositives": [],
+    "falseNegatives": [],
+    "results": [
+      {
+        "id": "g01",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.88,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g02",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g03",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g04",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g05",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g06",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g07",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g08",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g09",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g10",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g11",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 2,
+        "outcome": "TP"
+      },
+      {
+        "id": "g12",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g13",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.33,
+        "violationsCount": 2,
+        "outcome": "TP"
+      },
+      {
+        "id": "g14",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g15",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g16",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g17",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g18",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 2,
+        "outcome": "TP"
+      },
+      {
+        "id": "g19",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.33,
+        "violationsCount": 2,
+        "outcome": "TP"
+      },
+      {
+        "id": "g20",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g21",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g22",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g23",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g24",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g25",
+        "category": "formatting_edge_case",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g26",
+        "category": "formatting_edge_case",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g27",
+        "category": "formatting_edge_case",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g28",
+        "category": "single_digit_hallucination",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g29",
+        "category": "split_name_coincidence",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g30",
+        "category": "sentence_starter_stopword",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      }
+    ]
+  },
+  "devBaseline": {
+    "total": 30,
+    "tp": 14,
+    "tn": 11,
+    "fp": 3,
+    "fn": 2,
+    "accuracy": 83.3,
+    "precision": 82.4,
+    "recall": 87.5,
+    "f1": 84.9,
+    "falsePositives": [
+      {
+        "caseId": "g07",
+        "category": "clean_grounded",
+        "summary": "<ul><li>Microsoft and BlackRock created a $30 billion fund for AI infrastructure.</li><li>Capital will be deployed to develop data centers and energy facilities.</li></ul>",
+        "violations": [
+          {
+            "type": "entity",
+            "value": "Capital",
+            "reason": "Entity \"Capital\" is not mentioned in source article"
+          }
+        ],
+        "notes": "Correct investment figure $30 billion and named sponsors"
+      },
+      {
+        "caseId": "g26",
+        "category": "formatting_edge_case",
+        "summary": "<ul><li>Clean generation from wind and solar achieved 42% of total European electricity output.</li></ul>",
+        "violations": [
+          {
+            "type": "entity",
+            "value": "Clean",
+            "reason": "Entity \"Clean\" is not mentioned in source article"
+          }
+        ],
+        "notes": "Percentage representation: source has \"42 percent\" while summary has \"42%\""
+      },
+      {
+        "caseId": "g27",
+        "category": "formatting_edge_case",
+        "summary": "<ul><li>The platform was ordered to pay €500 million in regulatory penalties.</li></ul>",
+        "violations": [
+          {
+            "type": "currency",
+            "value": "€500 million",
+            "reason": "Metric \"€500 million\" appears in summary but is not present in original article"
+          }
+        ],
+        "notes": "Currency symbol: source has \"500 million euros\", summary has \"€500 million\""
+      }
+    ],
+    "falseNegatives": [
+      {
+        "caseId": "g28",
+        "category": "single_digit_hallucination",
+        "summary": "<ul><li>Transit authority received authorization to construct 8 new commuter rail routes.</li></ul>",
+        "notes": "Single digit hallucination: source has \"2\", summary invents \"8\""
+      },
+      {
+        "caseId": "g29",
+        "category": "split_name_coincidence",
+        "summary": "<ul><li>The board formally appointed John Smith as the new executive vice president.</li></ul>",
+        "notes": "Entity recombination: \"John\" from John Higgins + \"Smith\" from Michael Smith = fake entity \"John Smith\""
+      }
+    ],
+    "results": [
+      {
+        "id": "g01",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.86,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g02",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g03",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g04",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g05",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g06",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g07",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0.75,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "g08",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g09",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g10",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TN"
+      },
+      {
+        "id": "g11",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 2,
+        "outcome": "TP"
+      },
+      {
+        "id": "g12",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.8,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g13",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g14",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g15",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g16",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g17",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g18",
+        "category": "injected_wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 2,
+        "outcome": "TP"
+      },
+      {
+        "id": "g19",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.33,
+        "violationsCount": 2,
+        "outcome": "TP"
+      },
+      {
+        "id": "g20",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g21",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g22",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g23",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g24",
+        "category": "injected_wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "g25",
+        "category": "formatting_edge_case",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "g26",
+        "category": "formatting_edge_case",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "g27",
+        "category": "formatting_edge_case",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "g28",
+        "category": "single_digit_hallucination",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "g29",
+        "category": "split_name_coincidence",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "g30",
+        "category": "sentence_starter_stopword",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      }
+    ]
+  },
+  "heldoutCurrent": {
+    "total": 20,
+    "tp": 5,
+    "tn": 5,
+    "fp": 3,
+    "fn": 7,
+    "accuracy": 50,
+    "precision": 62.5,
+    "recall": 41.7,
+    "f1": 50,
+    "falsePositives": [
+      {
+        "caseId": "h07",
+        "category": "rounding",
+        "summary": "<ul><li>The company has about 1,600 employees.</li></ul>",
+        "violations": [
+          {
+            "type": "number",
+            "value": "1,600",
+            "reason": "Metric \"1,600\" appears in summary but is not present in original article"
+          }
+        ],
+        "notes": "Hedged rounding; judged faithful"
+      },
+      {
+        "caseId": "h08",
+        "category": "spelled_number",
+        "summary": "<ul><li>3 people were injured in the collision.</li></ul>",
+        "violations": [
+          {
+            "type": "number",
+            "value": "3",
+            "reason": "Metric \"3\" appears in summary but is not present in original article"
+          }
+        ],
+        "notes": "Word number in source, digit in summary"
+      },
+      {
+        "caseId": "h15",
+        "category": "multiword_entity",
+        "summary": "<ul><li>Federal Reserve Chair Jerome Powell signalled patience.</li></ul>",
+        "violations": [
+          {
+            "type": "entity",
+            "value": "Federal Reserve Chair Jerome Powell",
+            "reason": "Entity \"Federal Reserve Chair Jerome Powell\" is not mentioned in source article"
+          }
+        ],
+        "notes": "Inferable title merged into one capitalised span"
+      }
+    ],
+    "falseNegatives": [
+      {
+        "caseId": "h04",
+        "category": "swapped_attribution",
+        "summary": "<ul><li>Revenue rose 109% while net income rose 94%.</li></ul>",
+        "notes": "Both numbers exist in source but are attached to the wrong metric"
+      },
+      {
+        "caseId": "h05",
+        "category": "negation",
+        "summary": "<ul><li>The FDA approved the drug.</li></ul>",
+        "notes": "Polarity flipped; no numbers or new entities"
+      },
+      {
+        "caseId": "h06",
+        "category": "stopword_entity",
+        "summary": "<ul><li>Officials said chief executive Price closed the deal on Friday.</li></ul>",
+        "notes": "Invented person whose surname is in STOPWORDS ('Price')"
+      },
+      {
+        "caseId": "h10",
+        "category": "wrong_year",
+        "summary": "<ul><li>The law takes effect in 2027.</li></ul>",
+        "notes": "Year changed"
+      },
+      {
+        "caseId": "h11",
+        "category": "substring_number",
+        "summary": "<ul><li>The fund holds 150 assets.</li></ul>",
+        "notes": "Wrong number that is a substring of the right one"
+      },
+      {
+        "caseId": "h14",
+        "category": "swapped_roles",
+        "summary": "<ul><li>Activision acquired Microsoft for $69 billion.</li></ul>",
+        "notes": "Same entities and number, roles reversed"
+      },
+      {
+        "caseId": "h18",
+        "category": "wrong_currency",
+        "summary": "<ul><li>Regulators fined the company $500 million.</li></ul>",
+        "notes": "Currency changed, amount kept"
+      }
+    ],
+    "results": [
+      {
+        "id": "h01",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h02",
+        "category": "wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h03",
+        "category": "wrong_unit",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h04",
+        "category": "swapped_attribution",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h05",
+        "category": "negation",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h06",
+        "category": "stopword_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h07",
+        "category": "rounding",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "h08",
+        "category": "spelled_number",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "h09",
+        "category": "abbreviation",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h10",
+        "category": "wrong_year",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h11",
+        "category": "substring_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h12",
+        "category": "percent_format",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h13",
+        "category": "wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h14",
+        "category": "swapped_roles",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h15",
+        "category": "multiword_entity",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "h16",
+        "category": "invented_quantity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h17",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h18",
+        "category": "wrong_currency",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h19",
+        "category": "wrong_location",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h20",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      }
+    ]
+  },
+  "heldoutBaseline": {
+    "total": 20,
+    "tp": 7,
+    "tn": 5,
+    "fp": 3,
+    "fn": 5,
+    "accuracy": 60,
+    "precision": 70,
+    "recall": 58.3,
+    "f1": 63.6,
+    "falsePositives": [
+      {
+        "caseId": "h07",
+        "category": "rounding",
+        "summary": "<ul><li>The company has about 1,600 employees.</li></ul>",
+        "violations": [
+          {
+            "type": "number",
+            "value": "1,600",
+            "reason": "Metric \"1,600\" appears in summary but is not present in original article"
+          }
+        ],
+        "notes": "Hedged rounding; judged faithful"
+      },
+      {
+        "caseId": "h09",
+        "category": "abbreviation",
+        "summary": "<ul><li>The startup raised $5.2B in new funding.</li></ul>",
+        "violations": [
+          {
+            "type": "currency",
+            "value": "$5.2B",
+            "reason": "Metric \"$5.2B\" appears in summary but is not present in original article"
+          }
+        ],
+        "notes": "billion -> B"
+      },
+      {
+        "caseId": "h15",
+        "category": "multiword_entity",
+        "summary": "<ul><li>Federal Reserve Chair Jerome Powell signalled patience.</li></ul>",
+        "violations": [
+          {
+            "type": "entity",
+            "value": "Federal Reserve Chair Jerome Powell",
+            "reason": "Entity \"Federal Reserve Chair Jerome Powell\" is not mentioned in source article"
+          }
+        ],
+        "notes": "Inferable title merged into one capitalised span"
+      }
+    ],
+    "falseNegatives": [
+      {
+        "caseId": "h04",
+        "category": "swapped_attribution",
+        "summary": "<ul><li>Revenue rose 109% while net income rose 94%.</li></ul>",
+        "notes": "Both numbers exist in source but are attached to the wrong metric"
+      },
+      {
+        "caseId": "h05",
+        "category": "negation",
+        "summary": "<ul><li>The FDA approved the drug.</li></ul>",
+        "notes": "Polarity flipped; no numbers or new entities"
+      },
+      {
+        "caseId": "h10",
+        "category": "wrong_year",
+        "summary": "<ul><li>The law takes effect in 2027.</li></ul>",
+        "notes": "Year changed"
+      },
+      {
+        "caseId": "h11",
+        "category": "substring_number",
+        "summary": "<ul><li>The fund holds 150 assets.</li></ul>",
+        "notes": "Wrong number that is a substring of the right one"
+      },
+      {
+        "caseId": "h14",
+        "category": "swapped_roles",
+        "summary": "<ul><li>Activision acquired Microsoft for $69 billion.</li></ul>",
+        "notes": "Same entities and number, roles reversed"
+      }
+    ],
+    "results": [
+      {
+        "id": "h01",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h02",
+        "category": "wrong_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h03",
+        "category": "wrong_unit",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h04",
+        "category": "swapped_attribution",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h05",
+        "category": "negation",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h06",
+        "category": "stopword_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.67,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h07",
+        "category": "rounding",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "h08",
+        "category": "spelled_number",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h09",
+        "category": "abbreviation",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "h10",
+        "category": "wrong_year",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h11",
+        "category": "substring_number",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h12",
+        "category": "percent_format",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h13",
+        "category": "wrong_entity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h14",
+        "category": "swapped_roles",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "FN"
+      },
+      {
+        "id": "h15",
+        "category": "multiword_entity",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "FP"
+      },
+      {
+        "id": "h16",
+        "category": "invented_quantity",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h17",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      },
+      {
+        "id": "h18",
+        "category": "wrong_currency",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0.5,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h19",
+        "category": "wrong_location",
+        "synthetic": true,
+        "expected": "HALLUCINATED",
+        "predicted": "HALLUCINATED",
+        "score": 0,
+        "violationsCount": 1,
+        "outcome": "TP"
+      },
+      {
+        "id": "h20",
+        "category": "clean_grounded",
+        "synthetic": true,
+        "expected": "GROUNDED",
+        "predicted": "GROUNDED",
+        "score": 1,
+        "violationsCount": 0,
+        "outcome": "TN"
+      }
+    ]
+  }
 }

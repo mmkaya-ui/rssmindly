@@ -1,12 +1,17 @@
 // ==============================================================================
 // RSSMindly — Groundedness Evaluation Benchmark (30 Test Cases)
-// Measures the empirical detection rate of evaluateGroundedness against injected errors.
+// Measures the detection rate of evaluateGroundedness against injected errors.
+// DEV SET (below, 30 cases, all AI-authored): groundedness.js was changed until these passed,
+// so its score is optimistic. The honest estimate is the frozen held-out set in
+// evals/data/groundedness_heldout.json.
 // Analyzes True Positives, True Negatives, False Positives, and False Negatives.
 // ==============================================================================
 
 import fs from 'fs';
 import path from 'path';
 import { evaluateGroundedness } from '../api/lib/groundedness.js';
+// Frozen copy of groundedness.js before this work (commit a969d44), for before/after comparison
+import { evaluateGroundedness as evaluateGroundednessBaseline } from './baseline/groundedness_v0.js';
 
 export const GROUNDEDNESS_CASES = [
   // ----------------------------------------------------------------------------
@@ -296,11 +301,7 @@ export const GROUNDEDNESS_CASES = [
   }
 ];
 
-export function runGroundednessEval() {
-  console.log('===============================================================');
-  console.log(`🛡️ EVALUATING DETERMINISTIC GROUNDEDNESS (${GROUNDEDNESS_CASES.length} TEST CASES)`);
-  console.log('===============================================================\n');
-
+export function scoreGroundednessSet(cases, evaluateFn) {
   let tp = 0; // Correctly flagged hallucination
   let tn = 0; // Correctly passed grounded summary
   let fp = 0; // Grounded summary falsely flagged as hallucination
@@ -309,31 +310,32 @@ export function runGroundednessEval() {
   const falsePositives = [];
   const falseNegatives = [];
 
-  const results = GROUNDEDNESS_CASES.map(c => {
-    const report = evaluateGroundedness(c.summary, c.source, c.title);
+  const results = cases.map(c => {
+    const report = evaluateFn(c.summary, c.source, c.title);
     const predictedGrounded = report.isGrounded;
     const actualGrounded = c.expected_grounded;
 
     let outcome = '';
     if (!predictedGrounded && !actualGrounded) {
       tp++;
-      outcome = 'TP (Correctly caught hallucination)';
+      outcome = 'TP';
     } else if (predictedGrounded && actualGrounded) {
       tn++;
-      outcome = 'TN (Correctly passed grounded)';
+      outcome = 'TN';
     } else if (!predictedGrounded && actualGrounded) {
       fp++;
-      outcome = 'FP (False alarm on grounded text)';
-      falsePositives.push({ caseId: c.id, summary: c.summary, violations: report.violations, notes: c.notes });
-    } else if (predictedGrounded && !actualGrounded) {
+      outcome = 'FP';
+      falsePositives.push({ caseId: c.id, category: c.category, summary: c.summary, violations: report.violations, notes: c.notes });
+    } else {
       fn++;
-      outcome = 'FN (Missed hallucination)';
-      falseNegatives.push({ caseId: c.id, summary: c.summary, notes: c.notes });
+      outcome = 'FN';
+      falseNegatives.push({ caseId: c.id, category: c.category, summary: c.summary, notes: c.notes });
     }
 
     return {
       id: c.id,
       category: c.category,
+      synthetic: true,
       expected: actualGrounded ? 'GROUNDED' : 'HALLUCINATED',
       predicted: predictedGrounded ? 'GROUNDED' : 'HALLUCINATED',
       score: report.score,
@@ -342,54 +344,60 @@ export function runGroundednessEval() {
     };
   });
 
-  const total = GROUNDEDNESS_CASES.length;
-  const accuracy = Number((((tp + tn) / total) * 100).toFixed(1));
-  const precision = (tp + fp) === 0 ? 100 : Number(((tp / (tp + fp)) * 100).toFixed(1));
-  const recall = (tp + fn) === 0 ? 100 : Number(((tp / (tp + fn)) * 100).toFixed(1));
-  const f1 = (precision + recall) === 0 ? 0 : Number(((2 * precision * recall) / (precision + recall)).toFixed(1));
+  const total = cases.length;
+  const pct = (n, d) => (d === 0 ? null : Number(((n / d) * 100).toFixed(1)));
+  const accuracy = pct(tp + tn, total);
+  const precision = pct(tp, tp + fp);
+  const recall = pct(tp, tp + fn);
+  const f1 = (precision === null || recall === null || precision + recall === 0)
+    ? 0
+    : Number(((2 * precision * recall) / (precision + recall)).toFixed(1));
 
-  console.log('| Case ID | Category | Expected | Predicted | Violations | Outcome |');
-  console.log('|---------|----------|----------|-----------|------------|---------|');
-  results.forEach(r => {
-    console.log(`| ${r.id.padEnd(7)} | ${r.category.padEnd(26)} | ${r.expected.padEnd(12)} | ${r.predicted.padEnd(11)} | ${String(r.violationsCount).padStart(10)} | ${r.outcome} |`);
-  });
+  return { total, tp, tn, fp, fn, accuracy, precision, recall, f1, falsePositives, falseNegatives, results };
+}
 
-  console.log('\n--- Groundedness Evaluation Summary ---');
-  console.log(`- Total Cases: ${total}`);
-  console.log(`- Accuracy:  ${accuracy}% (${tp + tn}/${total})`);
-  console.log(`- Precision: ${precision}% (Catch quality: how many flagged items were real hallucinations)`);
-  console.log(`- Recall:    ${recall}% (Coverage: how many injected hallucinations were caught)`);
-  console.log(`- F1 Score:  ${f1}%\n`);
-
-  if (falsePositives.length > 0) {
-    console.log('⚠️ FALSE POSITIVES (Grounded summaries falsely flagged):');
-    falsePositives.forEach(fpCase => {
-      console.log(`  [${fpCase.caseId}] ${fpCase.notes}`);
-      console.log(`    Violations flagged:`, fpCase.violations);
-    });
-    console.log();
-  } else {
-    console.log('✅ Zero False Positives recorded!\n');
+function printSet(label, r) {
+  console.log(`\n--- ${label} ---`);
+  console.log(`cases ${r.total} | TP ${r.tp} TN ${r.tn} FP ${r.fp} FN ${r.fn} | accuracy ${r.accuracy}% | precision ${r.precision}% | recall ${r.recall}%`);
+  for (const x of r.falsePositives) {
+    console.log(`  FP [${x.caseId}] ${x.category}: ${x.notes} -> flagged ${x.violations.map(v => `${v.type}:"${v.value}"`).join(', ')}`);
   }
-
-  if (falseNegatives.length > 0) {
-    console.log('❌ FALSE NEGATIVES (Hallucinations that slipped through):');
-    falseNegatives.forEach(fnCase => {
-      console.log(`  [${fnCase.caseId}] ${fnCase.notes}`);
-    });
-    console.log();
-  } else {
-    console.log('✅ Zero False Negatives recorded!\n');
+  for (const x of r.falseNegatives) {
+    console.log(`  FN [${x.caseId}] ${x.category}: ${x.notes}`);
   }
+}
 
-  // Save results to evals/data/groundedness_results.json
+export function loadHeldoutCases() {
+  const p = path.resolve('evals/data/groundedness_heldout.json');
+  return JSON.parse(fs.readFileSync(p, 'utf8')).cases;
+}
+
+export function runGroundednessEval() {
+  const heldout = loadHeldoutCases();
+
+  console.log('===============================================================');
+  console.log(`🛡️ GROUNDEDNESS: ${GROUNDEDNESS_CASES.length} dev cases + ${heldout.length} held-out cases`);
+  console.log('===============================================================');
+  console.log('Dev set: groundedness.js was modified until it passed. Held-out set: frozen, not tuned against.');
+  console.log('Baseline = api/lib/groundedness.js as of a969d44 (before this work), frozen in evals/baseline/.');
+
+  const sets = {
+    devCurrent: scoreGroundednessSet(GROUNDEDNESS_CASES, evaluateGroundedness),
+    devBaseline: scoreGroundednessSet(GROUNDEDNESS_CASES, evaluateGroundednessBaseline),
+    heldoutCurrent: scoreGroundednessSet(heldout, evaluateGroundedness),
+    heldoutBaseline: scoreGroundednessSet(heldout, evaluateGroundednessBaseline)
+  };
+
+  printSet('Dev set, BASELINE code (before fixes)', sets.devBaseline);
+  printSet('Dev set, CURRENT code (tuned on this set)', sets.devCurrent);
+  printSet('Held-out set, BASELINE code', sets.heldoutBaseline);
+  printSet('Held-out set, CURRENT code (honest estimate)', sets.heldoutCurrent);
+  console.log('');
+
   const outPath = path.resolve('evals/data/groundedness_results.json');
-  fs.writeFileSync(outPath, JSON.stringify({
-    total, tp, tn, fp, fn, accuracy, precision, recall, f1,
-    falsePositives, falseNegatives, results
-  }, null, 2), 'utf8');
+  fs.writeFileSync(outPath, JSON.stringify(sets, null, 2), 'utf8');
 
-  return { accuracy, precision, recall, f1, tp, tn, fp, fn, falsePositives, falseNegatives };
+  return sets;
 }
 
 if (process.argv[1]?.endsWith('eval_groundedness.js')) {
